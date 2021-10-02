@@ -1,0 +1,2 @@
+# don't reformat other pkgs's files:
+/node_modules

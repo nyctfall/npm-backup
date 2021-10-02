@@ -1,0 +1,7 @@
+# this is the list of files git should NOT add to a repository:
+/node_modules
+# MacOS default directory files:
+.DS_Store
+.fseventsd
+# the Visual Studio Code, VSCodium, and Code – OSS editor workspace config file:
+.vscode
