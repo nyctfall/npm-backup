@@ -2,7 +2,7 @@ export * from "./prompt-answer"
 
 /** 
  * @debrief - This module creates the yes or no answer object.
- */ 
+ */
 
 // returned answer object:
 export interface Answer {
@@ -15,11 +15,11 @@ export interface Answer {
 // toYes and toNo should be MUTUALLY EXCLUSIVE when setting defaults!
 interface SetDefaultAnswerYes {
   readonly toYes: boolean
-  readonly toNo?: (false & boolean) | never
+  readonly toNo?: false | never
 }
 
 interface SetDefaultAnswerNo {
-  readonly toYes?: (false & boolean) | never
+  readonly toYes?: false | never
   readonly toNo: boolean
 }
 

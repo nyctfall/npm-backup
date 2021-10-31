@@ -1,5 +1,7 @@
 import * as Readline from "readline"
 import { stdin, stdout } from "process"
+import { execFile as execFileCallback } from "child_process"
+import { promisify } from "util"
 
 /**
  * @debrief - This is a module for all custom or modified utilities used in the program.
@@ -87,3 +89,7 @@ const asyncForEach = async (array: Array<any>, asyncCallback: Function, thisArg?
 }
 
 export { rl as AsyncReadline, asyncForEach }
+
+export const utilPromise = {
+  execFile: promisify(execFileCallback)
+}
