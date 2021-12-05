@@ -39,8 +39,9 @@
 // }
 
 
-type NAND_XOR<T, U, RestrictOverlapKeys_WithXOR> = {
-  [P in keyof T | keyof U]: // Checks all property keys of both types T and U: (string, number, and Symbol)
+
+type NAND_XOR_Half_Without_Optionals<T,U,RestrictOverlapKeys_WithXOR> = {
+    [P in keyof T | keyof U]: // Checks all property keys of both types T and U: (string, number, and Symbol)
     P extends keyof U // Check if the property is in type U
       ? P extends keyof T // Check if the property is ALSO in type T
         ? T[P] // If property is in both type T and U, it must be mutually exclusive. In this half the type of property in T takes precedence
@@ -49,8 +50,128 @@ type NAND_XOR<T, U, RestrictOverlapKeys_WithXOR> = {
           : U[P] // This property FROM U, IS ALLOWED to be added to T in a UNION
       : P extends keyof T // The property IS in type T, here just to satasfy syntax, since just having `: T[P]` will give an error: "Type 'P' cannot be used to index type 'T'. ts(2536)"
         ? T[P] // Return property, as it's exclusive to ONLY T
-        : Error & never // unused, as it should NEVER happen that a property FROM U or T, isn't IN U or T. But it's there to satify the syntax
-} | {
+        : never // unused, as it should NEVER happen that a property FROM U or T, isn't IN U or T. But it's there to satify the syntax
+}
+
+/**
+ * @summary Finds all Optional properties of a inteface type.
+ * - goal: make an object that has properties that are the keys of optional properties of the T type.
+ * - NOTE: also works with Symbol and number keys
+ * - step 1): loop over the props of T: the optionality of the holder is removed, to not emit "undefined" as a false positive key of T when keyof is used.
+ * - step 2): if the prop of T can be absent or undefined: then it's optional, which means it can't extend a required non-undefined prop.
+ * - step 3): return the known optional prop of T as a value for the holder.
+ * - step 4): return the known required prop of T never in the holder, so it won't be a false positive when listing it's value.
+ * @example
+ * type Exmpl = {a?: any, b: any, c?: any};
+ * FoundOptPropHolder<Exmpl>[keyof Exmpl]; // <- equals union type:  ("a" | "c")
+ */
+type  FoundOptPropsHolder<T> = {
+  [P in keyof T]-?: Partial<Pick<T,P>> extends Pick<T,P> ? P : never
+}
+
+type OptProps<T> = FoundOptPropsHolder<T>[keyof T]
+
+
+type NAND_XOR_Half<T,U,RestrictOverlapKeys_WithXOR> = {
+  [P in OptProps<T>]+?:
+  P extends keyof T
+  ? (NAND_XOR_Half_Without_Optionals<T,U,RestrictOverlapKeys_WithXOR>)[P]
+  : P extends keyof U
+  ? (NAND_XOR_Half_Without_Optionals<T,U,RestrictOverlapKeys_WithXOR>)[P]
+  : never
+} & {
+  [P in keyof Omit<T | U, OptProps<T>>]: // Checks all property keys of both types T and U: (string, number, and Symbol)
+  P extends keyof U // Check if the property is in type U
+    ? P extends keyof T // Check if the property is ALSO in type T
+      ? T[P] // If property is in both type T and U, it must be mutually exclusive. In this half the type of property in T takes precedence
+      : P extends keyof RestrictOverlapKeys_WithXOR // Since T doesn't have the property, return the property from U as it should be in T, as enumerated in the list of keys to prevent overlap
+        ? RestrictOverlapKeys_WithXOR[P] // If certain properties FROM U should have a certain value in T, use the value specified
+        : U[P] // This property FROM U, IS ALLOWED to be added to T in a UNION
+    : P extends keyof T // The property IS in type T, here just to satasfy syntax, since just having `: T[P]` will give an error: "Type 'P' cannot be used to index type 'T'. ts(2536)"
+      ? T[P] // Return property, as it's exclusive to ONLY T
+      : never // unused, as it should NEVER happen that a property FROM U or T, isn't IN U or T. But it's there to satify the syntax
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// START FROM HERE, WHEN I GET BACK:
+type ads = NAND_XOR_Half<Yes,No,null>
+let wer: ads = {toYes:true}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+type NAND_XOR<T, U, RestrictOverlapKeys_WithXOR> = NAND_XOR_Half<T,U,RestrictOverlapKeys_WithXOR> | {
   [P in keyof U | keyof T]: // Checks all property keys of both types U and T: (string, number, and Symbol)
     P extends keyof T // Check if the property is in type T
       ? P extends keyof U // Check if the property is ALSO in type U
@@ -61,9 +182,13 @@ type NAND_XOR<T, U, RestrictOverlapKeys_WithXOR> = {
       : P extends keyof U // The property IS in type U, here just to satasfy syntax, since just having `: U[P]` will give an error: "Type 'P' cannot be used to index type 'U'. ts(2536)"
         ? U[P] // Return property, as it's exclusive to ONLY U
         : Error & never // unused, as it should NEVER happen that a property FROM T or U, isn't IN T or U. But it's there to satify the syntax
-} 
+}
+
+
 
 type NAND<T, U> = NAND_XOR<T, U, null>
+
+
 
 interface No { toNo: boolean, toYes?: false | never }
 interface Yes { toYes: boolean, toNo?: false | never }
@@ -80,9 +205,9 @@ let t7: t = { toYes: true }
 let t3: t = { toYes: false, toNo: false }
 let t4: t = { toYes: true, toNo: false }
 let t5: t = { toNo: false, toYes: false }
-// let t6: t = { toNo: true, toYes: true } // <- should error
+let t6: t = { toNo: true, toYes: true } // <- should error
 
-const test = ({toYes, toNo }: t) => {
+const tester = ({toYes, toNo }: t) => {
   let t1: t = { toNo }
   let t2: t = { toYes }
   let t3: t = { toNo: !toNo }
@@ -94,9 +219,9 @@ const test = ({toYes, toNo }: t) => {
 }
 
 // test({toYes: true, toNo: true}) // <- should give error.
-test({toYes: false, toNo: true})
-test({toYes: true, toNo: false})
-test({toYes: false, toNo: false})
+tester({toYes: false, toNo: true})
+tester({toYes: true, toNo: false})
+tester({toYes: false, toNo: false})
 
 
 
@@ -211,16 +336,16 @@ type oq<T> = {
   [P in keyof Partial<T>]: Pick<T,P> extends keyof Partial<Pick<T,P>> ? P : 'doesn\'t'
 }
 
-type m<T,P> = {
-  a: Required<T> extends Required<P> ? true : false
-  b: Partial<T> extends Required<P> ? true : false
-  c: T extends Required<P> ? true : false
-  d: Required<T> extends P ? true : false
-  e: Partial<T> extends P ? true : false
-  f: T extends P ? true : false
-  g: Required<T> extends Partial<P> ? true : false
-  h: Partial<T> extends Partial<P> ? true : false
-  i: T extends Partial<P> ? true : false
+type m<T,U> = {
+  a: Required<T> extends Required<U> ? true : false
+  b: Partial<T> extends Required<U> ? true : false
+  c: T extends Required<U> ? true : false
+  d: Required<T> extends U ? true : false
+  e: Partial<T> extends U ? true : false
+  f: T extends U ? true : false
+  g: Required<T> extends Partial<U> ? true : false
+  h: Partial<T> extends Partial<U> ? true : false
+  i: T extends Partial<U> ? true : false
 }
 
 type qw = m<{t?: true}, {t: true}>

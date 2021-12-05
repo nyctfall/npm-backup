@@ -1,201 +1,79 @@
-import { thisExpression } from "@babel/types"
-import { utilPromise } from "./custom-utils"
-const {execFile} = utilPromise
+export * from "./pipeline-types"
+import type { 
+  Input, Output, 
+  Operation, Op, OpCurrier, OpCaller, OpResult, Pipeline, ImmutablePipeline,
+  OpsQueue, FlOpsQueue, QueueableOpLike, QueueableOpsPipeline, 
+  Trace, TraceInstanceInfo, TraceBack, EnvSettings, OpsQueueEnvSettings, /* EmptyPipeline */
+} from "./pipeline-types"
 
-/**
- * @overview - File System Operations and The Operations Queue:
- * 
- * All operations that affect the file system, or that have post-program effects, should be processed by the Operation Queue. The Ops-Q processes every external action, e.g.: making files and directories, and makes sure it's completed. But if there is an error of failure, the Ops-Q is disigned to automatically handle it, if it's recoverable. The entire program is run inside of an Ops-Q, so wheen a SIGINT (or simlar EVENT) is received, it will stop itself and clean up everything it was doing. Every Op added to the Ops-Q should have: - base execution locic, - error handling, and - program abort logic (e.g.: SIGINT)
- * 
- * So it should be able to try, retry, and cancel, abort and undo itself. For co-dependant multi-step Ops, and Ops-Batch can be created from multiple Ops, but each Op still needs all of their own logic. If a prereqisite Op fails in the Ops-Q fails, the other Ops that depend on it should be aborted. But in an Ops-Batch, a prerequisite Op can have a Fallback-Op in case it fails. A Fallback-Op should have the same output as the original Op, or have multiple Ops in a Fallback-Ops Set, or "FlOps Set", if it is functionally different. All Ops that depended on a failed Op will become an "XOp".
- * 
- * 
+/** 
+ * @fileoverview - File System Operations and The Operations Queue: *  * All operations that affect the file system, or that have post-program effects, should be processed by the Operation Queue. The Ops-Q processes every external action, e.g.: making files and directories, and makes sure it's completed. But if there is an error of failure, the Ops-Q is disigned to automatically handle it, if it's recoverable. The entire program is run inside of an Ops-Q, so wheen a SIGINT (or simlar EVENT) is received, it will stop itself and clean up everything it was doing. Every Op added to the Ops-Q should have: - base execution locic, - error handling, and - program abort logic (e.g.: SIGINT) *  * So it should be able to try, retry, and cancel, abort and undo itself. For co-dependant multi-step Ops, and Ops-Batch can be created from multiple Ops, but each Op still needs all of their own logic. If a prereqisite Op fails in the Ops-Q fails, the other Ops that depend on it should be aborted. But in an Ops-Batch, a prerequisite Op can have a Fallback-Op in case it fails. A Fallback-Op should have the same output as the original Op, or have multiple Ops in a Fallback-Ops Set, or "FlOps Set", if it is functionally different. All Ops that depended on a failed Op will become an "XOp". *  *  
+ */  
+
+
+const defDesc = "No Description"
+/*
+const defaultOutputErrMsg: Output["errorMsg"] = `ERROR! Error type: Error
+Name of the Operation that failed: "${defDesc}"
+Error exit code: 1
+Error output:  `
 */
-
-
-/** @summary a debugging tool that lists all input and output and environment settings */
-export type TraceBack = (...x: unknown[]) => Trace | TraceStep 
-
-export type Trace = {
-  pipelineInputs: Input[]
-  pipelineOutputs: Output[]
-  pipelineInstanceInfo: TraceInstanceInfo[]
-  enqueueChildDescriptions: string[]
-  enqueueLocalEnvirinments: EnvSettings[]
-  enqueueInstanceInfo: TraceInstanceInfo[]
-  globalEvnironment: OpsQueueEnvSettings
-  nestedTraces?: Trace[]
-}
-
-export type TraceStep = {
-  lastInput: Input
-  nextInput: Input
-  output: Output
-  localEnvirinment: EnvSettings
-  globalEvnironment?: OpsQueueEnvSettings
-} & TraceInstanceInfo
-
-type TraceInstancePipeline = {
-  isPipeline: boolean
-  isFallback: false
-  isOp: false
-}
-
-type TraceInstanceOp = {
-  isOp: boolean
-  isPipeline: false
-  isFallback: false
-}
-
-type TraceInstanceFlOp = {
-  isFallback: boolean
-  isPipeline: false
-  isOp: false
-}
-
-export type TraceInstanceInfo = TraceInstanceOp | TraceInstancePipeline | TraceInstanceFlOp
-
-
-/** */
-export type Input = Array<unknown>
-
-export interface Output { 
-  exitCode: number
-  error: Error
-  errorMessage: string
-  pipe: Input
-  debugBackTrace?: Trace
-}
-
-
-/** */
-export interface EnvSettings {
-  useDebug?: boolean
-  useShell: boolean
-  description?: string
-}
-
-export interface OpsQueueEnvSettings extends EnvSettings {
-  useNestingDebug: boolean
-}
-
-
-/** @summary the Op itself, normally NOT called directly */
-export type Op = (...args:OpArgs) => Promise<Output>
-
-/** @summary the thing an Op wraps to call */
-export type Operation = (...input: unknown[]) => unknown
-
-/** @summary args for an Op */
-export type OpArgs = readonly [func: Function, env: EnvSettings, input: Input]
-
-/** @summary what an Op returns, the data from the wrapped Operation is usually in an async Promise */
-export type OpResult = Promise<Output> | Output
-
-/** @summary what an OpCurrier returns, used for calling an Op after giving it all of its args */
-export type OpCaller = (input: Input) => OpResult
-
-/** @summary returns an OpCaller, use this to give all of the args to the Op and then use the OpCaller when you're ready to run the Operation */
-export type OpCurrier = (func: Function, env: EnvSettings) => OpCaller
-//type OpCurrierPreset = (...args:OpArgs) => OpCaller
-
-/** @summary used to hold all of the OpCallers or OpPipelines */
-type OpsQueue = Array<QueueableOpLike>
-
-/**
- * @summary Used to hold all of the Fallback OpCallers or OpPipelines.
- *  - NOTE: ALL fallbacks MUST return the SAME data as the ORIGINAL failed Op!
- */
-type FlOpsQueue = WeakMap<OpCaller | QueueableOpsPipeline, QueueableOpLike[]>
-
-/** @summary a wrapper to make an OpsPipeline able to be added to another OpsPipeline's OpsQueue */
-type QueueableOpsPipeline = (input: Input) => OpResult
-
-/** @summary a callable Op-like function to be used inside of a pipeline */
-type QueueableOpLike = QueueableOpsPipeline | OpCaller
-
-// /** @summary used to hold all of the previous OpCaller's or OpPipeline's input args and the returned output data */
-// type OpsQueueValve = Array<ValveEntry>
-
-// /** @summary used to hold one OpCaller's or OpPipeline's returned output data and its input args */
-// type ValveEntry = {
-//   output: Output
-//   lastInput: Input
-// }
-
-
-
-/** @summary a pipeline that has already been set, and does NOT have  .pipe()  or  .fallback()  methods that change it. */
-export interface ImmutablePipeline {
-  isMutable: false
-  start(...x: unknown[]): OpResult
-  lock(...x: unknown[]): ImmutablePipeline
-}
-
-/** @summary a normal mutable pipeline that hasn't been used yet */
-export interface Pipeline<T> extends Omit<ImmutablePipeline, "isMutable"> {
-  isMutable: boolean
-  pipe?(...x: unknown[]): T
-  fallback?(...x: unknown[]): T
-}
-
-
-
+const defDbg = false
+const defSh = false
 /**
  * @description - An Op is a neat little wrapper function for error handling.
- * @param func 
- * @param input 
- * @param env 
- * @returns { 
- *  exitCode: number, 
- *  error: Error,
- *  errmsg: string,
- *  pipe: unknown
- * }
+ * @param fn the function to wrap in the Op
+ * @param input the array of arguments given to the function, each index is spread to the function's parameter:  `func(...input[])` .
+ * @param environment 
+ * @returns {Promise<Output>} 
  */
-const op: Op = async (func: Function, env: EnvSettings, input: Input): Promise<Output> => 
-{
+export const op: Op = async (fn: Operation, input: Input, { useShell = defSh, useDebug = defDbg, description = defDesc }: EnvSettings = { useShell: defSh, useDebug: defDbg , description: defDesc }): Promise<Output> => {
+  
+  // the return value:
   const output: Output = {
-    exitCode: 0,
-    error: Error("Not a real error: This is just the default error value, before it is set by a real error, if one occures."),
-    errorMessage: "",
+    exitCode: 1,
+    error: Error(),
+    errorMsg: "",
     pipe: []
   }
-
+  
   try {
     // try the function operation:
-    output.pipe = await func(...input)
+    const result = await fn(...input)
+
+    // save the output to the pipe, and make it an array if it is not an array:
+    output.pipe = result instanceof Array ? result : [ result ]
+
+    // it did not error, so it was successful:
+    output.exitCode = 0
   }
   catch (e) {
-    try {
-      // if a shell fuction failed, in a Bourne-like POSIX-compatible shell, capture its error code using the shell environment variable:
-      if (env.useShell){
-        // use Bourne-like shell variable to get last command's exit code:
-        const shellErrorCode = await execFile("echo $?")
-        
-        if (shellErrorCode) {
-          output.exitCode = Number.parseInt(shellErrorCode.stdout)
-        }
-      } 
-      else {
-        /** @todo - figure out how to make more useful error codes. */
-        // non-zero means error:
-        output.exitCode = 1
+    /** @todo - figure out how to make more useful error codes. */
+    // non-zero means error:
+    output.exitCode = 1
+    
+    // if a shell fuction failed, save the  `child_process`  Error exit code status:
+    if (useShell && typeof e === "object" && e !== null) {
+      if ("status" in e && typeof (e as {status: number}).status === "number") {
+        output.exitCode = (e as Record<string,unknown> & {status: number}).status // as statement used to satisfy TS.
       }
-    } 
-    catch (e){
-      // in case the shell caused an error:
-      /** @todo - figure out how to make more useful error codes. */
-      output.exitCode = 1
-    } 
-    finally {
-      output.error = e as Error
-      output.errorMessage += String(output.pipe)
-      
-      console.error(`ERROR! Failed job: "${env.description}"
-      Error message from failed function:
-      ${output.errorMessage}`)
+      else if ("code" in e && typeof (e as {code: number}).code === "number") {
+        output.exitCode = (e as Record<string,unknown> & {code: number}).code // as statement used to satisfy TS.
+      }
     }
+
+    // set Error object to thrown error:
+    if (e instanceof Error) output.error = e
+    
+    // set err msg:
+    output.errorMsg = 
+`ERROR! Error type: ${output.error.name}
+Name of the Operation that failed: "${description}"
+Error exit code: ${output.exitCode}
+Error output: ${output.error}`
+    
+    // output debug info:
+    if (useDebug) console.error(output.errorMsg)
   } 
   finally {
     return output
@@ -204,9 +82,9 @@ const op: Op = async (func: Function, env: EnvSettings, input: Input): Promise<O
 
 
 // function to save the settings of an Op to be called later:
-const OpCurry: OpCurrier = (func: Function, env: EnvSettings): OpCaller => {
+export const opCurry: OpCurrier = (fn: Operation, env?: EnvSettings): OpCaller => {
   return (input: Input): OpResult => {
-    return op(func, env, input)
+    return op(fn, input, env)
   }
 }
 
@@ -216,6 +94,7 @@ const OpCurry: OpCurrier = (func: Function, env: EnvSettings): OpCaller => {
  * @todo Sematic chaining with:
  *  -  .conduet()  to convert to another format the next Op uses.
  *  -  .parallel(...Ops[])  to execute multiple Ops simultaineously when they all make part of the input for the next Op.
+ *  -  .abort()  to stop an OpsPipeline from continuing, (a clean exit after receiving a SIGINT).
  * @todo Add debuggers.
  * @todo Add compat for Ops with preset input.
  */
@@ -223,29 +102,40 @@ export class OpsPipeline implements Pipeline<OpsPipeline> {
   isMutable = true 
   private queue: OpsQueue = []
   private fallbackOps: FlOpsQueue = new WeakMap()
-  private trace: Trace
-  private lastSetOpIndex: number = -1
+  private trace?: Trace
   private isPipelineFlagSet: WeakSet<QueueableOpsPipeline> = new WeakSet()
   private readonly env: OpsQueueEnvSettings
 
-  constructor(description: string, env?: Omit<EnvSettings | OpsQueueEnvSettings, "description">){
+  constructor(description: string, env?: Omit<OpsQueueEnvSettings, "description">){
+    
     // set the environment settings changed from the defaults.
+    // freeze the object to prevet it from being changed while the pipeline is running.
     this.env = Object.freeze(Object.assign({ 
       useShell: false, 
       useDebug: false, 
-      useNestingDebug: false 
-    }, {description}, env))
+      useNestingDebug: false,
+      description
+    },
+      env,
+      (env && env.useNestingDebug && !env.useDebug /*is falsy*/ && {
+        useDebug: env.useNestingDebug // <- Here to prevent bug where nested debug isn't collected because `useDebug` isn't also true.
+      })
+    ))
 
-    // initialise the trace:
-    this.trace = {
-      pipelineInputs: [],
-      pipelineOutputs: [],
-      pipelineInstanceInfo: [],
-      enqueueChildDescriptions: [],
-      enqueueLocalEnvirinments: [],
-      enqueueInstanceInfo: [],
-      nestedTraces: [],
-      globalEvnironment: this.env
+    // conditional is used to not save unused debug info:
+    if (this.env.useDebug) {
+      // initialise the trace:
+      this.trace = {
+        pipelineInputs: [],
+        pipelineOutputs: [],
+        pipelineInstanceInfo: [],
+        enqueueChildDescriptions: [],
+        enqueueLocalEnvirinments: [],
+        enqueueInstanceInfo: [],
+        globalEvnironment: this.env
+      }
+      // conditional is used to reduce unused debug info:
+      if (this.env.useNestingDebug) this.trace.nestedTraces = []
     }
   }
 
@@ -263,8 +153,10 @@ export class OpsPipeline implements Pipeline<OpsPipeline> {
    *  )
    */
   private nest(): QueueableOpsPipeline {
+    // prevent any more Ops from being added after the entire Pipeline is added to another Pipeline,
+    // and return callable version.
     return async (input: Input) => {
-      return this.start(input)
+      return this.lock().start(input)
     }
   }
 
@@ -275,16 +167,21 @@ export class OpsPipeline implements Pipeline<OpsPipeline> {
   private formatOp(operation: Operation | OpsPipeline, env: EnvSettings): OpCaller | QueueableOpsPipeline | undefined {
     // check if an OpsPipeline is being added to the OpsQueue:
     if (operation instanceof OpsPipeline) {
+      // lock the pipeline and make it callable:
       const queueOpsPl = operation.nest()
+
+      // used by the debugger:
       this.isPipelineFlagSet.add(queueOpsPl)
+      
       return queueOpsPl
     } 
     // otherwise, treat it as an Op:
     else if (typeof operation === "function"){
       // create Op and then add it to the queue:
       // also add general env settings that weren't overriden by the more specific env.
-      return OpCurry(operation, env)
+      return opCurry(operation, env)
     }
+    // do nothing if it can't be used in the pipeline...
   }
 
   /** 
@@ -302,19 +199,25 @@ export class OpsPipeline implements Pipeline<OpsPipeline> {
    *  .pipe(fnDoStuff)
    *  .start(initDataInput)
    */
-  // pipe?(operation: OpsPipeline): this
-  // pipe?(operation: Operation, description: string, envExtras?: Omit<EnvSettings, "description">): this
-  pipe?(operation: Operation | OpsPipeline, description: string, envExtras?: Omit<EnvSettings, "description">): this {
-    if (!this.isMutable) return this //  throw Error(`Attempted to add fallback Operation to a locked Pipeline.`)
-    
-    // Op's environment:
-    const env: EnvSettings = {...this.env, description, ...envExtras}
+  pipe(operation: OpsPipeline): this
+  pipe(operation: Operation, description: string, envExtras?: Omit<EnvSettings, "description">): this
+  pipe(operation: Operation | OpsPipeline, description?: string, envExtras?: Omit<EnvSettings, "description">): this {
+    if (!this.isMutable) throw Error(`Attempted to add fallback Operation to a locked Pipeline.`) // return this
     
     // is a function, and isn't a pipeline:
     const isOp = typeof operation === "function"
     // is a pipeline, and isn't a function:
     const isPipeline = operation instanceof OpsPipeline
     
+    // Op's environment:
+    // and if the operation is a nested Pipeline, use the Pipeline's description.
+    const env: EnvSettings = {
+      ...this.env, 
+      description: isPipeline ? operation.env.description : description, 
+      ...envExtras
+    }
+    
+
     // add to the queue.
     if (isPipeline || isOp){
       
@@ -325,22 +228,20 @@ export class OpsPipeline implements Pipeline<OpsPipeline> {
       const callableOpLike = this.formatOp(operation, env)
       
       // enqueue it if its valid:
-      if (callableOpLike) {
-        this.queue.push(callableOpLike)
-        
-        // increment the counter, since a new Op is being processed:
-        this.lastSetOpIndex++
-      }
+      if (callableOpLike) this.queue.push(callableOpLike)
     }
     
-    // add some tracing info:
-    this.trace.enqueueChildDescriptions.push(description)
-    this.trace.enqueueLocalEnvirinments.push(env)
-    this.trace.enqueueInstanceInfo.push({
-      isOp,
-      isPipeline,
-      isFallback: false
-    } as TraceInstanceInfo)
+    // prevent unused debug info from being created:
+    if (this.env.useDebug && this.trace && typeof this.trace === "object") {
+      // add some tracing info:
+      this.trace.enqueueChildDescriptions.push(description ?? (isPipeline ? (operation.env.description ?? "") : ""))
+      this.trace.enqueueLocalEnvirinments.push(env)
+      this.trace.enqueueInstanceInfo.push({
+        isOp,
+        isPipeline,
+        isFallback: false
+      } as TraceInstanceInfo)
+    }
 
     // return is used for chaining:
     return this
@@ -393,20 +294,25 @@ export class OpsPipeline implements Pipeline<OpsPipeline> {
    *  )
    *  .start(input) // <- THIS WILL NOT DO ANYTHING!
    */
-  // fallback?(fallback: OpsPipeline): this
-  // fallback?(fallback: Operation, description: string, envExtras?: Omit<EnvSettings, "description">): this
-  fallback?(fallback: OpsPipeline | Operation, description: string, envExtras?: Omit<EnvSettings, "description">): this {
-    if (!this.isMutable) return this //  throw Error(`Attempted to add fallback Operation to a locked Pipeline.`)
-    if (this.queue.length > 0 && this.lastSetOpIndex >= 0 && this.lastSetOpIndex < this.queue.length) return this //  throw Error(`Attempted to add fallback Operation without a setting a preceeding Operation in the Pipeline.`)
-    
-    // Op's environment:
-    const env: EnvSettings = {...this.env, description, ...envExtras}
+  fallback(fallback: OpsPipeline): this
+  fallback(fallback: Operation, description: string, envExtras?: Omit<EnvSettings, "description">): this
+  fallback(fallback: OpsPipeline | Operation, description?: string, envExtras?: Omit<EnvSettings, "description">): this {
+    if (!this.isMutable) throw Error(`Attempted to add fallback Operation to a locked Pipeline.`) // return this
+    if (this.queue.length < 1) return this //  throw Error(`Attempted to add fallback Operation without a setting a preceeding Operation in the Pipeline.`)
     
     // is a function, and isn't a pipeline:
     const isOp = typeof fallback === "function"
     // is a pipeline, and isn't a function:
     const isPipeline = fallback instanceof OpsPipeline
     
+    // Op's environment:
+    // and if the operation is a nested Pipeline, use the Pipeline's description.
+    const env: EnvSettings = {
+      ...this.env, 
+      description: isPipeline ? fallback.env.description : description, 
+      ...envExtras
+    }
+
     // add to the FlOps queue.
     if (isPipeline || isOp){
       // convert to valid Op-like:
@@ -419,8 +325,8 @@ export class OpsPipeline implements Pipeline<OpsPipeline> {
       // enqueue if valid:
       if (enqueueable) {
         
-        // the Op to make a fallback for:
-        const targetForFailsafe = this.queue[this.lastSetOpIndex]
+        // make a fallback for the last Op added to the pipeline's queue:
+        const targetForFailsafe = this.queue[this.queue.length - 1]
 
         // the array of FlOps for the target Op:
         const flOpsList: QueueableOpLike[] | undefined = this.fallbackOps.get(targetForFailsafe)
@@ -440,35 +346,50 @@ export class OpsPipeline implements Pipeline<OpsPipeline> {
       }
     }
 
-    
-    // add some tracing info:
-    this.trace.enqueueChildDescriptions.push(description)
-    this.trace.enqueueLocalEnvirinments.push(env)
-    this.trace.enqueueInstanceInfo.push({
-      isOp,
-      isPipeline,
-      isFallback: true
-    } as TraceInstanceInfo)
+    // prevent unused debug info from being created:
+    if (this.env.useDebug && this.trace && typeof this.trace === "object") {
+      // add some tracing info:
+      this.trace.enqueueChildDescriptions.push(description ?? (isPipeline ? (fallback.env.description ?? "") : ""))
+      this.trace.enqueueLocalEnvirinments.push(env)
+      this.trace.enqueueInstanceInfo.push({
+        isOp,
+        isPipeline,
+        isFallback: true
+      } as TraceInstanceInfo)
+    }
 
     // return used for chaining:
     return this
   }
 
   /**
-   * @summary Make the pipeline IMMUTABLE.
-   * @returns the pipeline WITHOUT a  .pipe()  ,  .fallback()  , or a modifiable OpsQueue.
+   * @summary Make the pipeline IMMUTABLE. Makes `.pipe` and `.fallback` undefined on the object itself, so it will not call the methods on the prototype chain. It also uses `Object.freeze()` to make the pipeline queues immutable.
+   * @returns the pipeline WITHOUT the `.pipe()` or `.fallback()` functions first in the prototype chain or a modifiable OpsQueue.
    */
   lock(): ImmutablePipeline {
-    // prevent any more Ops from being added to the pipeline
-    // by either 1): removing all Op adding functions from the pipeline
-    delete this.pipe
-    delete this.fallback
-    // or 2): preventing the OpsQueue and FlOpsQueue from being appended at either the Op adding methods's side, or the Array-like holders themselves.
+    // prevent any more Ops from being added to the pipeline:
+    // set the flag to false, which will prevent methods from adding to the pipeline:
     this.isMutable = false
-    Object.freeze(this.queue) // looking into using  Object.freeze()
+
+    // and freeze the queues:
+    Object.freeze(this.queue)
+    Object.freeze(this.fallbackOps)
+
+    // // the methods that add to the pipeline queue are on the `.prototype` or `__proto__`,
+    // // so make properties irectly oin the object
+    // this.pipe = undefined
+    // this.fallback = undefined
     
     // return the unmodifiable object, use for calling  .start()  later on:
     return this as ImmutablePipeline
+  }
+
+  /**
+   * @summary Returns the debugging trace.
+   */
+  traceback(): ReturnType<TraceBack> | undefined {
+    
+    return this.trace
   }
 
   /** 
@@ -481,22 +402,26 @@ export class OpsPipeline implements Pipeline<OpsPipeline> {
     this.lock()
 
     // returns final output, or input for parent pipeline if this is a nested Op
-    let pipelineOutputValve: Output = {
+    const pipelineOutputValve: Output = {
       exitCode: 1,
-      error: Error("Not a real error: Default preset."),
-      errorMessage: "Operations Pipeline did change this default non-error message.",
+      error: Error(),//Error("Not a real error: Default preset."),
+      errorMsg: "",//"Operations Pipeline did change this default non-error message.",
       pipe: input
     }
     
+    //  try..catch  is used for two reasons:
+    // 1): to use a  throw  statement to error out of loop after an Op reports unrecoverable failure an there's no fallback for it.
+    // 2): just in case the Op throws, even though Ops should not throw any errors as they have a  try..catch  for themselves.
     try {
       // loop through every Op in the Queue, and put it in the Pipeline:
-      outsideLoopBlockLabel: for (const nextOp of this.queue) {
+      for (const nextOp of this.queue) {
         
         // save output:
         const output = await nextOp(input)
+
         pipelineOutputValve.exitCode = output.exitCode
         
-        if (this.env.useDebug) {
+        if (this.env.useDebug && this.trace instanceof Object) {
           // save trace info for Op:
           this.trace.pipelineOutputs.push(output)
           this.trace.pipelineInputs.push(input)
@@ -505,7 +430,7 @@ export class OpsPipeline implements Pipeline<OpsPipeline> {
           type dbTraceKey = keyof Output;
           // save nested debug trace:
           if (this.env.useNestingDebug && "debugBackTrace" as dbTraceKey in output) {
-            // as expression used to satisfy TypeScript:
+            // the  as Type  expression is used to satisfy TypeScript:
             this.trace.nestedTraces?.push(output.debugBackTrace as Trace)
           }
         }
@@ -515,7 +440,7 @@ export class OpsPipeline implements Pipeline<OpsPipeline> {
           // save to pipe to use later:
           input = output.pipe
           
-          if (this.env.useDebug) {
+          if (this.env.useDebug && this.trace instanceof Object) {
             // save trace for a succesful Op:
             const isPipeline = this.isPipelineFlagSet.has(nextOp)
             
@@ -538,9 +463,10 @@ export class OpsPipeline implements Pipeline<OpsPipeline> {
           for (const nextFlOp of flOpsQueue) {
             // save output from the next fallback to try to see if it succeeds:
             const flOutput = await nextFlOp(input)
+
             pipelineOutputValve.exitCode = flOutput.exitCode
             
-            if (this.env.useDebug) {
+            if (this.env.useDebug && this.trace && typeof this.trace === "object") {
               // save trace info for FlOp:
               this.trace.pipelineInputs.push(input)
               this.trace.pipelineOutputs.push(flOutput)
@@ -549,7 +475,7 @@ export class OpsPipeline implements Pipeline<OpsPipeline> {
             // use FlOp fallback if it exited successfully:
             if (flOutput.exitCode === 0) {
               
-              if (this.env.useDebug) {
+              if (this.env.useDebug && this.trace && typeof this.trace === "object") {
                 // save trace for a succesful Op:
                 const isPipeline = this.isPipelineFlagSet.has(nextFlOp)
                 this.trace.pipelineInstanceInfo.push({
@@ -560,40 +486,51 @@ export class OpsPipeline implements Pipeline<OpsPipeline> {
               }
 
               // save to pipe to use later:
-              input = output.pipe
+              input = flOutput.pipe
 
-              // leave loop since the fallback worked:
+              // leave the fallback loop since the fallback worked, and return to the main Op loop:
               break
             }
             // if NONE of the fallbacks were successful, error out on the last index:
             else if (flIndex === flOpsQueue.length - 1) {
               // give up on the fallback and entire queue, and error out:
-              break outsideLoopBlockLabel
-              flOutput
+              pipelineOutputValve.errorMsg = flOutput.errorMsg
+              throw new Error(`ERROR: Operations Pipeline had an unrecoverable failure: The main Operation failed, and every fallback Operation for it also failed.`) 
             }
           }
         }
         else {
           // give up on the queue, and error out:
-          break
+          pipelineOutputValve.errorMsg = output.errorMsg
+          throw new Error(`ERROR: Operations Pipeline had an unrecoverable failure: The main Operation failed, and there was no fallback Operation for it.`) 
         }
       }
       // nothing errored out:
       // a value of 0 means no errors.
       pipelineOutputValve.exitCode = 0
-      pipelineOutputValve.errorMessage = "Not an real error: Successfully finished without any unmanageable errors."
+      // pipelineOutputValve.errorMsg = `Not an real error: Successfully finished Operations Pipeline: "${this.env.description}" without any unmanageable errors.`
     }
     catch (e) {
       // set error:
       if (e instanceof Error) pipelineOutputValve.error = e
-      else pipelineOutputValve.errorMessage = String(e)
       
       // non-zero value means an error occured
       pipelineOutputValve.exitCode = 1
+      
+      // set error message:
+      pipelineOutputValve.errorMsg = 
+`ERROR! Error type: ${pipelineOutputValve.error.name}
+Name of the Operation Pipeline that failed: "${this.env.description}"
+Error exit code: ${pipelineOutputValve.exitCode}
+Error output:  ${pipelineOutputValve.errorMsg}`
+
+      if (this.env.useDebug) console.error(pipelineOutputValve.errorMsg)
     }
     finally {
       // save debugging trace:
-      if (this.env.useDebug) pipelineOutputValve.debugBackTrace = this.trace
+      if (this.env.useDebug && this.trace && typeof this.trace === "object") pipelineOutputValve.debugBackTrace = this.trace
+      
+      // save final output:
       pipelineOutputValve.pipe = input
 
       // return the finished output:
