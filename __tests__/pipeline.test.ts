@@ -12,7 +12,7 @@ import { errStdFnV, loStdFnV } from "../src-ts/test-helper-presets"
 describe("The `Op` chaining Pipeline class, it calls `OpCurriers` that then call `Ops` that wrap the `Operation` functions, it then sends the `Output.pipe` of each `Op` as the `Input` (type Array<unknown>) to the next `Op`.", () => {
   describe("Empty OpsPipeline, `OpsQueue` is an empty array (no `.pipe()` was called).", () => {
     test("Default environment settings, with empty-string `OpsPipeline.env.description`, and empty Array `.start([])` argument. And the array should flow-through like a loopback, that is, it should return the input as `Output.pipe`.", async () => {
-      const input: never[] = []
+      const input: undefined[] = []
       const pl = new OpsPipeline("")
       const outputTest: Output = await pl.start(input)
 
@@ -31,7 +31,7 @@ describe("The `Op` chaining Pipeline class, it calls `OpCurriers` that then call
     })
 
     test("`.useShell` environment settings...", async () => {
-      const input: never[] = []
+      const input: undefined[] = []
       const pl = new OpsPipeline("", {useShell: true})
       const outputTest = await pl.start(input)
 
@@ -50,7 +50,7 @@ describe("The `Op` chaining Pipeline class, it calls `OpCurriers` that then call
     })
 
     test("`description` environment settings...", async () => {
-      const input: never[] = []
+      const input: undefined[] = []
       const pl = new OpsPipeline("Pl-desc")
       const outputTest = await pl.start(input)
 
@@ -69,7 +69,7 @@ describe("The `Op` chaining Pipeline class, it calls `OpCurriers` that then call
     })
 
     test("`useDebug` environment settings...", async () => {
-      const input: never[] = []
+      const input: undefined[] = []
       const pl = new OpsPipeline("", {useDebug: true})
       const outputTest = await pl.start(input)
       
@@ -105,7 +105,7 @@ describe("The `Op` chaining Pipeline class, it calls `OpCurriers` that then call
     })
     
     test("`useNestingDebug` environment settings...", async () => {
-      const input: never[] = []
+      const input: undefined[] = []
       const pl = new OpsPipeline("", { useNestingDebug: true })
       const outputTest = await pl.start(input)
       
@@ -141,7 +141,7 @@ describe("The `Op` chaining Pipeline class, it calls `OpCurriers` that then call
     
     describe("introspection into the `private` TS properties of an empty OpsPipeline.", () => {
       test("Default environment settings...", async () => {
-        const input: never[] = []
+        const input: undefined[] = []
         const pl: OpsPipeline = new OpsPipeline("")
 
         expect(pl).toBeDefined()
@@ -208,7 +208,7 @@ describe("The `Op` chaining Pipeline class, it calls `OpCurriers` that then call
       })
 
       test("`useShell` environment settings...", async () => {
-        const input: never[] = []
+        const input: undefined[] = []
         const pl: OpsPipeline = new OpsPipeline("", {useShell: true})
 
         expect(pl).toBeDefined()
@@ -275,7 +275,7 @@ describe("The `Op` chaining Pipeline class, it calls `OpCurriers` that then call
       })
 
       test("`description` environment settings...", async () => {
-        const input: never[] = []
+        const input: undefined[] = []
         const pl: OpsPipeline = new OpsPipeline("pl-desc")
 
         expect(pl).toBeDefined()
@@ -342,7 +342,7 @@ describe("The `Op` chaining Pipeline class, it calls `OpCurriers` that then call
       })
 
       test("`useDebug` environment settings...", async () => {
-        const input: never[] = []
+        const input: undefined[] = []
         const pl: OpsPipeline = new OpsPipeline("", {useDebug: true})
   
         expect(pl).toBeDefined()
@@ -426,7 +426,7 @@ describe("The `Op` chaining Pipeline class, it calls `OpCurriers` that then call
       })
 
       test("`useNestingDebug` environment settings...", async () => {
-        const input: never[] = []
+        const input: undefined[] = []
         const pl: OpsPipeline = new OpsPipeline("", {useNestingDebug: true})
   
         expect(pl).toBeDefined()

@@ -7,15 +7,41 @@
  * 
  */
 
-// // OLDEST VERSION:
-// // type NAND<T, U> = {
-// //   [P in keyof T]: P extends keyof U ? T[P] : U[keyof U]
+// // // OLDEST VERSION:
+// // // type NAND<T, U> = {
+// // //   [P in keyof T]: P extends keyof U ? T[P] : U[keyof U]
+// // // } | {
+// // //   [P in keyof U]: P extends keyof T ? U[P] : T[keyof T]
+// // // }
+// // // --------------------------------------------------------------------------------
+// // OLDER VERSION:
+// // type NAND_XOR<T, U, RestrictOverlapKeys_WithXOR> = {
+// //   [P in keyof T | keyof U]: // Checks all property keys of both types T and U: (string, number, and Symbol)
+// //     P extends keyof U // Check if the property is in type U
+// //       ? P extends keyof T // Check if the property is ALSO in type T
+// //         ? T[P] // If property is in both type T and U, it must be mutually exclusive. In this half the type of property in T takes // precedence
+// //         : P extends keyof RestrictOverlapKeys_WithXOR // Since T doesn't have the property, return the property from U as it should // be in T, as enumerated in the list of keys to prevent overlap
+// //           ? RestrictOverlapKeys_WithXOR[P] // If certain properties FROM U should have a certain value in T, use the value specified
+// //           : U[P] // This property FROM U, IS ALLOWED to be added to T in a UNION
+// //       : P extends keyof T // The property IS in type T, here just to satasfy syntax, since just having `: T[P]` will give an error: // "Type 'P' cannot be used to index type 'T'. ts(2536)"
+// //         ? T[P] // Return property, as it's exclusive to ONLY T
+// //         : Error & never // unused, as it should NEVER happen that a property FROM U or T, isn't IN U or T. But it's there to satify // the syntax
 // // } | {
-// //   [P in keyof U]: P extends keyof T ? U[P] : T[keyof T]
+// //   [P in keyof U | keyof T]: // Checks all property keys of both types U and T: (string, number, and Symbol)
+// //     P extends keyof T // Check if the property is in type T
+// //       ? P extends keyof U // Check if the property is ALSO in type U
+// //         ? U[P] // If property is in both type U and T, it must be mutually exclusive. In this half the type of property in U takes // precedence
+// //         : P extends keyof RestrictOverlapKeys_WithXOR // Since U doesn't have the property, return the property from T as it should // be in U, as enumerated in the list of keys to prevent overlap
+// //           ? RestrictOverlapKeys_WithXOR[P] // If certain properties FROM T should have a certain value in U, use the value specified
+// //           : T[P] // This property FROM T, IS ALLOWED to be added to U in a UNION
+// //       : P extends keyof U // The property IS in type U, here just to satasfy syntax, since just having `: U[P]` will give an error: // "Type 'P' cannot be used to index type 'U'. ts(2536)"
+// //         ? U[P] // Return property, as it's exclusive to ONLY U
+// //         : Error & never // unused, as it should NEVER happen that a property FROM T or U, isn't IN T or U. But it's there to satify // the syntax
 // // }
-// OLD VERSION:
-// type NAND_XOR<T, U, RestrictOverlapKeys_WithXOR> = {
-//   [P in keyof T | keyof U]: // Checks all property keys of both types T and U: (string, number, and Symbol)
+// // -----------------------------------------------------------------------------------
+// OLD Version:
+// type NAND_XOR_Half<T,U,RestrictOverlapKeys_WithXOR> = Required<Omit<T,OptProps<T>>> & {
+//   [P in OptProps<T> | keyof U]+?:
 //     P extends keyof U // Check if the property is in type U
 //       ? P extends keyof T // Check if the property is ALSO in type T
 //         ? T[P] // If property is in both type T and U, it must be mutually exclusive. In this half the type of property in T takes precedence
@@ -24,34 +50,10 @@
 //           : U[P] // This property FROM U, IS ALLOWED to be added to T in a UNION
 //       : P extends keyof T // The property IS in type T, here just to satasfy syntax, since just having `: T[P]` will give an error: "Type 'P' cannot be used to index type 'T'. ts(2536)"
 //         ? T[P] // Return property, as it's exclusive to ONLY T
-//         : Error & never // unused, as it should NEVER happen that a property FROM U or T, isn't IN U or T. But it's there to satify the syntax
-// } | {
-//   [P in keyof U | keyof T]: // Checks all property keys of both types U and T: (string, number, and Symbol)
-//     P extends keyof T // Check if the property is in type T
-//       ? P extends keyof U // Check if the property is ALSO in type U
-//         ? U[P] // If property is in both type U and T, it must be mutually exclusive. In this half the type of property in U takes precedence
-//         : P extends keyof RestrictOverlapKeys_WithXOR // Since U doesn't have the property, return the property from T as it should be in U, as enumerated in the list of keys to prevent overlap
-//           ? RestrictOverlapKeys_WithXOR[P] // If certain properties FROM T should have a certain value in U, use the value specified
-//           : T[P] // This property FROM T, IS ALLOWED to be added to U in a UNION
-//       : P extends keyof U // The property IS in type U, here just to satasfy syntax, since just having `: U[P]` will give an error: "Type 'P' cannot be used to index type 'U'. ts(2536)"
-//         ? U[P] // Return property, as it's exclusive to ONLY U
-//         : Error & never // unused, as it should NEVER happen that a property FROM T or U, isn't IN T or U. But it's there to satify the syntax
+//         : never // unused, as it should NEVER happen that a property FROM U or T, isn't IN U or T. But it's there to satify the syntax
 // }
+// 
 
-
-
-type NAND_XOR_Half_Without_Optionals<T,U,RestrictOverlapKeys_WithXOR> = {
-    [P in keyof T | keyof U]: // Checks all property keys of both types T and U: (string, number, and Symbol)
-    P extends keyof U // Check if the property is in type U
-      ? P extends keyof T // Check if the property is ALSO in type T
-        ? T[P] // If property is in both type T and U, it must be mutually exclusive. In this half the type of property in T takes precedence
-        : P extends keyof RestrictOverlapKeys_WithXOR // Since T doesn't have the property, return the property from U as it should be in T, as enumerated in the list of keys to prevent overlap
-          ? RestrictOverlapKeys_WithXOR[P] // If certain properties FROM U should have a certain value in T, use the value specified
-          : U[P] // This property FROM U, IS ALLOWED to be added to T in a UNION
-      : P extends keyof T // The property IS in type T, here just to satasfy syntax, since just having `: T[P]` will give an error: "Type 'P' cannot be used to index type 'T'. ts(2536)"
-        ? T[P] // Return property, as it's exclusive to ONLY T
-        : never // unused, as it should NEVER happen that a property FROM U or T, isn't IN U or T. But it's there to satify the syntax
-}
 
 /**
  * @summary Finds all Optional properties of a inteface type.
@@ -63,37 +65,56 @@ type NAND_XOR_Half_Without_Optionals<T,U,RestrictOverlapKeys_WithXOR> = {
  * - step 4): return the known required prop of T never in the holder, so it won't be a false positive when listing it's value.
  * @example
  * type Exmpl = {a?: any, b: any, c?: any};
- * FoundOptPropHolder<Exmpl>[keyof Exmpl]; // <- equals union type:  ("a" | "c")
+ * FoundOptPropHolder<Exmpl>; // <- equals Record<string|number|symbol,string|number|symbol|never> type:  { a: "a", b: never, c: "c" }
  */
-type  FoundOptPropsHolder<T> = {
+type FoundOptPropsHolder<T> = {
   [P in keyof T]-?: Partial<Pick<T,P>> extends Pick<T,P> ? P : never
 }
 
+/**
+ * @summary Returns a union type of all the optional property keys of Object T.
+ * @example
+ * type Exmpl = {a?: any, b: any, c?: any};
+ * OptProps<Exmpl>; // <- equals union type:  ("a" | "c")
+ */
 type OptProps<T> = FoundOptPropsHolder<T>[keyof T]
 
+/**
+ * @summary Create a union type that has mutually exclusive properites.
+ */
+type NAND_XOR_Half<T,U,RestrictOverlapKeys_WithXOR, OptProps_T extends keyof T> = Required<Omit<T,OptProps_T>> & {
+    [P in OptProps_T | keyof U]+?:
+      P extends keyof U // Check if the property is in type U
+        ? P extends keyof T // Check if the property is ALSO in type T
+          ? T[P] // If property is in both type T and U, it must be mutually exclusive. In this half the type of property in T takes precedence
+          : P extends keyof RestrictOverlapKeys_WithXOR // Since T doesn't have the property, return the property from U as it should be in T, as enumerated in the list of keys to prevent overlap
+            ? RestrictOverlapKeys_WithXOR[P] // If certain properties FROM U should have a certain value in T, use the value specified
+            : U[P] // This property FROM U, IS ALLOWED to be added to T in a UNION
+        : P extends keyof T // The property IS in type T, here just to satasfy syntax, since just having `: T[P]` will give an error: "Type 'P' cannot be used to index type 'T'. ts(2536)"
+          ? T[P] // Return property, as it's exclusive to ONLY T
+          : never // unused, as it should NEVER happen that a property FROM U or T, isn't IN U or T. But it's there to satify the syntax
+}
+  
 
-type NAND_XOR_Half<T,U,RestrictOverlapKeys_WithXOR> = {
-  [P in OptProps<T>]+?:
-  P extends keyof T
-  ? (NAND_XOR_Half_Without_Optionals<T,U,RestrictOverlapKeys_WithXOR>)[P]
-  : P extends keyof U
-  ? (NAND_XOR_Half_Without_Optionals<T,U,RestrictOverlapKeys_WithXOR>)[P]
-  : never
-} & {
-  [P in keyof Omit<T | U, OptProps<T>>]: // Checks all property keys of both types T and U: (string, number, and Symbol)
-  P extends keyof U // Check if the property is in type U
-    ? P extends keyof T // Check if the property is ALSO in type T
-      ? T[P] // If property is in both type T and U, it must be mutually exclusive. In this half the type of property in T takes precedence
-      : P extends keyof RestrictOverlapKeys_WithXOR // Since T doesn't have the property, return the property from U as it should be in T, as enumerated in the list of keys to prevent overlap
-        ? RestrictOverlapKeys_WithXOR[P] // If certain properties FROM U should have a certain value in T, use the value specified
-        : U[P] // This property FROM U, IS ALLOWED to be added to T in a UNION
-    : P extends keyof T // The property IS in type T, here just to satasfy syntax, since just having `: T[P]` will give an error: "Type 'P' cannot be used to index type 'T'. ts(2536)"
-      ? T[P] // Return property, as it's exclusive to ONLY T
-      : never // unused, as it should NEVER happen that a property FROM U or T, isn't IN U or T. But it's there to satify the syntax
+
+type NAND_XOR<T, U, RestrictOverlapKeys_WithXOR> = NAND_XOR_Half<T,U,RestrictOverlapKeys_WithXOR, OptProps<T>> | NAND_XOR_Half<U,T,RestrictOverlapKeys_WithXOR, OptProps<U>>
+
+type NAND_XOR_Helper<NAND_XOR_Half_T, NAND_XOR_Half_U> = {
+  [P in keyof NAND_XOR_Half_T]: NAND_XOR_Half_T[P]
+} | {
+  [P in keyof NAND_XOR_Half_U]: NAND_XOR_Half_U[P]
 }
 
 
 
+type NAND<T, U, RestrictOverlapKeys_WithXOR> = NAND_XOR_Helper<
+  NAND_XOR_Half< 
+    T,U,RestrictOverlapKeys_WithXOR, OptProps<T>
+  >, 
+  NAND_XOR_Half<
+    U,T,RestrictOverlapKeys_WithXOR, OptProps<U>
+  >
+>
 
 
 
@@ -114,77 +135,48 @@ type NAND_XOR_Half<T,U,RestrictOverlapKeys_WithXOR> = {
 
 
 
+type t01 = FoundOptPropsHolder<{a: "1", b?: "2", c?: "3", d: "4"}>
+type t02 = OptProps<{a: "1", b?: "2", c?: "3", d: "4"}>
 
 
 
+type ads = NAND<{ toNo: boolean }, { toYes: boolean }, {toYes: false, toNo: false}>
+// let wer1: ads = { toYes:true,toNo:true } // should error.
+let wer2: ads = { toYes:false,toNo:true }
+let wer3: ads = { toYes:true,toNo:false }
+let wer4: ads = { toYes:false,toNo:false }
+let wer5: ads = { toYes:true }
+let wer6: ads = { toYes:false }
+let wer7: ads = { toNo:false }
+let wer8: ads = { toNo:true }
 
 
 
+type ads0 = NAND<{ toNo: boolean, toYes?: false | never }, { toYes: boolean }, {toYes: false, toNo: false} >
+// let wer01: ads0 = { toYes:true,toNo:true } // should error.
+let wer02: ads0 = { toYes:false,toNo:true }
+let wer03: ads0 = { toYes:true,toNo:false }
+let wer04: ads0 = { toYes:false,toNo:false }
+let wer05: ads0 = { toYes:true }
+let wer06: ads0 = { toYes:false }
+let wer07: ads0 = { toNo:false }
+let wer08: ads0 = { toNo:true }
 
 
+type ads00 = NAND<{ toNo: boolean, toYes?: false | never }, { toYes: boolean, toNo?: false | never }, {toYes: false, toNo: false} >
+// let wer001: ads00 = { toYes:true,toNo:true } // should error.
+let wer002: ads00 = { toYes:false,toNo:true }
+let wer003: ads00 = { toYes:true,toNo:false }
+let wer004: ads00 = { toYes:false,toNo:false }
+let wer005: ads00 = { toYes:true }
+let wer006: ads00 = { toYes:false }
+let wer007: ads00 = { toNo:false }
+let wer008: ads00 = { toNo:true }
 
 
-// START FROM HERE, WHEN I GET BACK:
-type ads = NAND_XOR_Half<Yes,No,null>
-let wer: ads = {toYes:true}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-type NAND_XOR<T, U, RestrictOverlapKeys_WithXOR> = NAND_XOR_Half<T,U,RestrictOverlapKeys_WithXOR> | {
-  [P in keyof U | keyof T]: // Checks all property keys of both types U and T: (string, number, and Symbol)
-    P extends keyof T // Check if the property is in type T
-      ? P extends keyof U // Check if the property is ALSO in type U
-        ? U[P] // If property is in both type U and T, it must be mutually exclusive. In this half the type of property in U takes precedence
-        : P extends keyof RestrictOverlapKeys_WithXOR // Since U doesn't have the property, return the property from T as it should be in U, as enumerated in the list of keys to prevent overlap
-          ? RestrictOverlapKeys_WithXOR[P] // If certain properties FROM T should have a certain value in U, use the value specified
-          : T[P] // This property FROM T, IS ALLOWED to be added to U in a UNION
-      : P extends keyof U // The property IS in type U, here just to satasfy syntax, since just having `: U[P]` will give an error: "Type 'P' cannot be used to index type 'U'. ts(2536)"
-        ? U[P] // Return property, as it's exclusive to ONLY U
-        : Error & never // unused, as it should NEVER happen that a property FROM T or U, isn't IN T or U. But it's there to satify the syntax
-}
-
-
+/* 
 
 type NAND<T, U> = NAND_XOR<T, U, null>
 
@@ -225,28 +217,7 @@ tester({toYes: false, toNo: false})
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // TESTING: ...
-
-
-
-
 
 
 
@@ -351,4 +322,6 @@ type m<T,U> = {
 type qw = m<{t?: true}, {t: true}>
 
 type oa = oq<x2>
-type oa2 = Complete<x2>
+type oa2 = Complete<x2> 
+
+*/
