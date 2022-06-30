@@ -5,6 +5,7 @@
 .fseventsd
 # the Visual Studio Code, VSCodium, and Code – OSS editor workspace config file:
 .vscode
+*.code_workspace
 # the Jest code-base coverage report:
 /coverage/
 **/lcov-report/

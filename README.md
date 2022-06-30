@@ -28,7 +28,7 @@ A tool for backing up NPM packages locally, for offline installs!
   - [TODO: Local Package Registry or Database Server](#todo-db-server)
   - [TODO: Prevent ReDoS Vulnerablities](#todo-regex)
   - [TODO: Future Install Methods](#todo-install)
-- [Contrbute]()
+- [Contrbute](#contributing)
 
 
 ## **Project Goal:** <a id="goal"></a>
@@ -69,7 +69,7 @@ In their award-winning Unix paper of 1974, Ritchie and Thompson quote the follow
 - ### **Pkg Resistry Compatibility List:**
 
 
-## **API Specification:**
+## **API Specification: (TODO)**
 - ### **Input Sanitization:**
 - ### **Operation Execution Queue:**
   - ### **Operations Batch:**
@@ -77,12 +77,6 @@ In their award-winning Unix paper of 1974, Ritchie and Thompson quote the follow
   - ### **File System:**
   - ### **Network Requests:**
 - ### **File System Handlers:**
-- ### **TODO:**
-- ### **TODO:**
-- ### **TODO:**
-- ### **TODO:**
-- ### **TODO:**
-- ### **TODO:**
 
 
 
@@ -92,13 +86,13 @@ In their award-winning Unix paper of 1974, Ritchie and Thompson quote the follow
 
 ## Project Goal: <a id="lazy-project-goal"></a>
 
-Create a Node.js and Bash automation script to create off-line backups of NPM packages for later install with ALL necasary dependancies included. Improving on NPM `pack`.
+Create a Node.js and Bash automation script to create offline backups of NPM packages for later install with ALL necasary dependancies included. Improving on NPM `pack`.
 
 ## Keystone Implementation Steps: <a id="lazy-implementation"></a>
 
 ### Command-line arguments: <a id="lazy-cli"></a>
 
-Command-line arguments should have the behavior of NPM `install` and NPM `pack` combined. Allowing NPM pkgs to be installed and also added to NPM's `/_cacache` file. It should most importantly have a pkg's "production" deps installed as "bundled" deps, otherwise, the deps won't be backed up when NPM `pack` is used. There should also be options to install and backup "optional", "development", and "peer" deps. 
+Command-line arguments should have the behavior of both NPM `install` and NPM `pack` as if they were combined. Allowing NPM pkgs to be installed and also added to NPM's `/_cacache` file. It should most importantly have a pkg's "production" deps installed as "bundled" deps, otherwise, the deps won't be backed up when NPM `pack` is used. There should also be options to install and backup "optional", "development", and "peer" deps. 
 
 - If the "no" deps option is used, not even a pkg's "bundled" dep will be installed.
 - If the "bundled" deps option is used, then the pkg will be installed as if the normal NPM `pack` command was used, and only the deps included by default will be backed up.
@@ -111,8 +105,8 @@ There should be a way to use `npm install`'s ability to use Git repository URLs 
 
 ### User Input Validation: <a id="lazy-input-validation"></a>
 
-User input sanittization and sanitization should be used to prevent typos in command-line arguments and ensure the correct pkg is being installed in the intended way. All of the pkgs to be installed should be check against the registry to make sure the user is installing the intended pkg. 
-While local file system pkg installs should ensure user permissions and intent to install said local pkg, if the pkg is outside of the Node.js and pkg manager's instalation llocation or the user's home directory.
+User input sanitization should be used to prevent typos in command-line arguments and ensure the correct pkg is being installed in the intended way. All of the pkgs should be checked against the registry to make sure the user is installing the intended pkg. 
+While local file system pkg installs should ensure user permissions and intent to install said local pkg, if the pkg is outside of the Node.js and pkg manager's instalation location or the user's home directory.
 And if the pkg is from a repo URL, then the repo owner/maintainer is confirmed to be trusted by the user, or the `whois` of the website is confirmed to be trused by the user. Along with showing the user the pkg contents to confirm it is the correct pkg.
 Improper characters are also filtered out of the arguments according to the respective installation type, to prevent 'code injection' vulnerablities.
 
@@ -127,11 +121,11 @@ So it should be able to try, retry, and cancel, abort and undo itself. For co-de
 
 ### File System Handlers: <a id="lazy-fs-handler"></a>
 
-File system handlers are used as convenient wrappers for file operations, and act as a live view of directories and dynamic files. It should use an asynchronous design for all operations, since disk resonce may take an extremely long time. Any static file system properties should be memouized to prevent unnecessary repeated checks. For dynamic FS properties, Getters/Setters should be used. If files/dirs are expectedd to move around the FS, then location-independant file referencing (like inodes in UNIN-like systems) should be used. Directory abstractions should have a nested structure of child files/dirs.
+File system handlers are used as convenient wrappers for file operations, and act as a live view of directories and dynamic files. It should use an asynchronous design for all operations, since disk responces may take an extremely long time. Any static file system properties should be memoized to prevent unnecessary repeated checks. For dynamic FS properties, Getters/Setters should be used. If files/dirs are expectedd to move around the FS, then location-independant file referencing (like inodes in UNIX-like systems) should be used. Directory abstractions should have a nested structure of child files/dirs.
 
 ### Package Manager Facade Wapper API: <a id="lazy-pkg-mgr-wrapper-api"></a>
 
-Because NPM's (also Yarn Pkg and Bower) CLI commands have many configurable runtime options (like NPM's `color`), and because commands, options, and syntax can change between pkg mgr. versions and different pkg mgrs (like Yarn Pkg, and Bower). It should be able to use all relevant `config` runtime settings. It sould be able to use all relevent CLI commands. And it should use the `Package` class for pkg info and input sanitization for each respective CLI command and pkg mgr.'s syntax.
+Because NPM's (also Yarn Pkg and Bower) CLI commands have many configurable runtime options (like NPM's `color`), and because commands, options, and syntax can change between pkg mgr. versions and different pkg mgrs (like Yarn Pkg, and Bower). It should be able to use all relevant `config` runtime settings. It sould be able to use all relevent CLI commands. And it should use the `Package` class for pkg info and input sanitization for each respective CLI command and pkg manager's syntax.
 
 ### `Package` Class: <a id="lazy-pkg-class"></a>
 A pkg handling API. It is the high-level interface for managing pkgs using a conveinient abstraction layer. It should use:
@@ -151,7 +145,7 @@ There could be another version of the `Package` class, possibly called the `Pack
 
 
 ### Possible Development Environment Tools: <a id="dev-env"></a>
-For production: oclif, yargs, ora, chalk, boxen, inquirerer/commander.
+For production: commander, inquirer, ora, chalk, boxen, (oclif? / yargs?).
 
 For Development: TypeScript, Babel, ESLint, Preitter, JSDoc, Gulp, Jest.
 
@@ -163,7 +157,7 @@ For Development: TypeScript, Babel, ESLint, Preitter, JSDoc, Gulp, Jest.
 - [ ] Create API documentation.
 - [ ] Implement cryptographic checksum backup integrity validation.
 - [ ] Create live offline database functionality.
-- [ ] Bash version for Bash shell, Zsh shell, Bourne-compatible shells, and Windows GitBash.
+- [ ] Bash version for Bash shell, Zsh shell, Bourne-compatible shells, POSIX-compatible shells, and Windows GitBash.
 - [ ] Python version for universal use.
 - [ ] etc...
 - [ ] Publish Bash and Python versions to package repositories:
@@ -185,25 +179,25 @@ For Development: TypeScript, Babel, ESLint, Preitter, JSDoc, Gulp, Jest.
 To future-proof the CLI, here are some improvements that will be needed:
 - Create a version that doesn't use any NPM deps, all tools built in-house.
 - A version that is compatible with using repo URLs to install pkgs from, possibly using `cURL` or `WGet`.
-- A shell script version that uses the code from the `jq` library code in the codebase, so a Node.js runtime isn't required.
+- A shell script version that uses the `jq` library for JSON parsing, so a Node.js runtime isn't required.
 - A local offline registry server to use as an install location, to be seemlessly integrated with the pkg manager, like `npm install`.
 
 
 ### Backup Database (Server?): <a id="todo-db-server"></a>
-Pkg backup database using checksums for integrity verification. It has write-protection on the pkg backup database and every pkg backup is read-only to prevent malicious pkg backup alteration. But if a database isn't used, then all pkg backups should have  hashes to check against their checksums, to make sure it wasn't altered, before installing it.
+Pkg backup database using checksums for integrity verification. It has write-protection on the pkg backup database and every pkg backup is read-only to prevent malicious pkg backup alteration. But if a database isn't used, then all pkg backups should have hashes to check against their checksums, to make sure it wasn't altered, before installing it.
 
-The SHA3 checksums should be stored in a write-protected read-only format (using file prermmissions if possible). And each checksum entry should correspond to a specific pkg backup with a unique ID, so multiple different verions of the same pkg can be backed up.
+The SHA2/SHA3 checksums should be stored in a write-protected read-only format (using file permissions if possible). And each checksum entry should correspond to a specific pkg backup with a unique ID, so multiple different verions of the same pkg can be backed up.
 
 
 ### Better RegExp? <a id="todo-regex"></a>
-To prevent REDoS (Regular Expression Denial of Service) attacks, it may be beneficial to implement a time-limit to RegExp execution, (in addition to using a length-limit). tthis may be possible to do using some async code, like using Intervals and `Promises`. But it may require a custom RegExp implementation, most likely best implemented in Web Assembly, where it is less general-purpose but faster at evaluations.
+To prevent ReDoS (Regular Expression Denial of Service) attacks, it may be beneficial to implement a time-limit for RegExp execution, (in addition to using a length-limit). this may be possible to do using some async code, like using `Intervals` and `Promises`. But it may require a custom RegExp implementation, most likely best implemented in Web Assembly, where it is faster at evaluations.
 
 ---
 ### **TODO: Install:** <a id="todo-install"></a>
 ```bash
-    $ npm install --global # TODO: make NPM pkg like: "npm-pkg-packer@alpha" or something...
+    $ npm install --global # TODO: make NPM pkg like: "npm-super-pack@alpha" or something...
 ```
 
 ---
-# Contributing:
-As of the moment, this project is just a learning experience. But contributions are still welcome, they may just take a while to be reviewed. I also have not made a CONTRIBUTING just yet, so it will be looked into in the future...
+# Contributing: <a id="contributing"></a>
+As of the moment, this project is just a learning experience. But contributions are still welcome, they may just take a while to be reviewed. I also have not made a CONTRIBUTING.md just yet, so it will be looked into in the future...

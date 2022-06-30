@@ -103,7 +103,7 @@ export type Op = (fn: Operation, input: Input, env?: EnvSettings) => Promise<Out
  * - NOTE currently has litte to no support for Generators of AsyncGenerator Functions.
  * @returns An Array, or a value that will be put in an Array, in order to be piped.
  */
-export type Operation = (...input: unknown[]) => unknown[] | unknown
+export type Operation = (...input: any[]) => any[] | any
 
 /** @summary args for an Op */
 export type OpArgs = Parameters<Op>
