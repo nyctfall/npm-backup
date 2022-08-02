@@ -1,11 +1,12 @@
 import { describe, test, /* expect */ } from "@jest/globals"
 // import * as cli from "../src-ts/arg-parse"
-const cli = {
+// import { OpsPipeline } from "../src-ts/op-queue-pipeline"
+/* const cli = {
   verifyOptions: jest.fn(),
   sanitizePkgName: jest.fn(),
   readPkgName: jest.fn(),
   readPkgVersion: jest.fn()
-}
+} */
 /* const cli = {
   verifyOptions: jest.fn((str: string) => {
     return [...str.matchAll(/(--\w+(?<=[= ])([\w-]+))|(-[a-zA-Z\d]+)/g)]
@@ -244,7 +245,6 @@ describe("Fuzz-Testing:", () => {
         const modes = Array.from(distribMap.values()).sort()
         const min = Math.min(...modes)
         const max = Math.max(...modes)
-        console.log(modes,min,max,max-min,distribMap)
     
         expect(max).toBeLessThanOrEqual(Math.ceil((10000/posSpace) * 1.25)) // max occurences of a specific str:
         
@@ -281,7 +281,6 @@ describe("Fuzz-Testing:", () => {
         const modes = Array.from(distribMap.values()).sort()
         const min = Math.min(...modes)
         const max = Math.max(...modes)
-        console.log(modes,min,max,max-min,distribMap)
     
         expect(max).toBeLessThanOrEqual(Math.ceil((10000/posSpace) * 1.25)) // max occurences of a specific str:
         
@@ -318,7 +317,6 @@ describe("Fuzz-Testing:", () => {
         const modes = Array.from(distribMap.values()).sort()
         const min = Math.min(...modes)
         const max = Math.max(...modes)
-        console.log(modes,max-min,distribMap)
     
         expect(max).toBeLessThanOrEqual(Math.ceil((10000/posSpace) * 1.25)) // max occurences of a specific str:
         
@@ -332,14 +330,14 @@ describe("Fuzz-Testing:", () => {
   describe("SemVer Version parsing:", () => {
 
   })
-
+/* 
   describe("CLI arguments using user-defined input strings:", () => {
     test("Package name arg:", async () => {
       const addChars = ["@","/","-","_"]
       const testPkgStr = fuzzGibberishRange({maxStrLen: 10000, addChars, useOnlyAlphaNum: true})
 
       for (let i = 0; i < 100; i++) {
-        expect(cli.readPkgName(testPkgStr)).resolves.toHaveProperty("pkgs")
+        expect(cli.argParser(['--', testPkgStr], cli.commander)).resolves.toHaveProperty("pkgs")
       }
     })
     
@@ -347,17 +345,17 @@ describe("Fuzz-Testing:", () => {
       const addChars = ["@","/","-","_"]
       const testPkgStr = fuzzGibberishRange({maxStrLen: 10000, addChars, useOnlyAlphaNum: true})
       const testPkgVer = fuzzGibberishRange({maxStrLen: 10000, onlyChars: [".", ..."0123456789".split("")]})
-      const testPkgStrWithVer = `${testPkgStr}@${testPkgVer}`
+      // const testPkgStrWithVer = `${testPkgStr}@${testPkgVer}`
 
       for (let i = 0; i < 100; i++) {
-        expect(cli.readPkgName(testPkgStrWithVer)).resolves.toHaveProperty("pkgs", expect.objectContaining({
+        expect(cli.argParser(['--', testPkgStr], cli.commander)).resolves.toHaveProperty("pkgs", expect.objectContaining({
           [testPkgStr]: testPkgVer
         }))
       }
     })
 
   })
-
+ */
   describe("The options use to set program command behavior.", () => {
     test.todo("Use Fuzzing to test command argument parsing.")
   
@@ -371,7 +369,7 @@ describe("Fuzz-Testing:", () => {
         // test("", async () => {})
         
         describe("Common opts:", () => {
-          test.todo("Opt: -- (flag to read follow arguments as pkgs.) :")
+          test.todo("Opt: -- (flag to read following arguments as pkgs.) :")
           test.todo("Opt: --dry-run :")
           test.todo("Opt: --force | -f :")
           test.todo("Opt: --no | --no-yes | -n :")
@@ -493,6 +491,162 @@ describe("Fuzz-Testing:", () => {
           test.todo("Opt: --sso-type :")
           test.todo("Opt: --tmp :")
         })
+      })
+    })
+  })
+})
+
+/* describe("SemVer Version parsing:", () => {
+
+})
+
+describe("CLI arguments using user-defined input strings:", () => {
+  test("Package name arg:", async () => {
+    const res = await cli.command(["-vv", "npm"])
+    console.log(res.opts?.())
+    console.log(res.args)
+  })
+  
+  test("Package version arg:", async () => {
+    expect(await cli.command(["--", "packageName"])).toHaveProperty("args", ["packageName"])
+  })
+
+}) */
+
+describe("The options use to set program command behavior.", () => {
+  test.todo("Use Fuzzing to test command argument parsing.")
+
+  test("args: pkg", async () => {})
+  // test("", async () => {})
+
+  describe("CLI options:", () => {
+    // test("", async () => {})
+    
+    describe("Basic CLI options:", () => {
+      // test("", async () => {})
+      
+      describe("Common opts:", () => {
+        test.todo("Opt: -- (flag to read following arguments as pkgs.) :")
+        test.todo("Opt: --dry-run :")
+        test.todo("Opt: --force | -f :")
+        test.todo("Opt: --no | --no-yes | -n :")
+        test.todo("Opt: --no-save :")
+        test.todo("Opt: --save | -S :")
+        test.todo("Opt: --save-prod | -P :")
+        test.todo("Opt: --save-dev | -O:")
+        test.todo("Opt: --save-optional | -O :")
+        test.todo("Opt: --save-exact | -E :")
+        test.todo("Opt: --save-bundle | -B :")
+        test.todo("Opt: --usage | --help | -? | -h | -H :")
+        test.todo("Opt: --version | -v :")
+        test.todo("Opt: --yes | -y :")
+      })
+      
+      describe("Useful opts:", () => {
+        test.todo("Opt: --audit :")
+        test.todo("Opt: --audit-level :")
+        test.todo("Opt: --before | --enjoy-by :")
+        test.todo("Opt: --color :")
+        test.todo("Opt: --description | --desc :")
+        test.todo("Opt: --include :")
+        test.todo("Opt: --json :")
+        test.todo("Opt: --legacy-bundling :")
+        test.todo("Opt: --legacy-peer-deps :")
+        test.todo('Opt: --loglevel ("silent", "error", "warn", "notice", "http", "timing", "info", "verbose", or "silly") :')
+        test.todo("Opt: --loglevel silent | --silent | -s :")
+        test.todo("Opt: --loglevel warn | --quiet | -q :")
+        test.todo("Opt: --loglevel info | -d :")
+        test.todo("Opt: --loglevel verbose | --verbose | --dd :")
+        test.todo("Opt: --loglevel silly | --ddd :")
+        test.todo("Opt: --long | -l :")
+        test.todo("Opt: --maxsockets:")
+        test.todo("Opt: --node-version:")
+        test.todo("Opt: --omit :")
+        test.todo("Opt: --parseable | --porcelain | -p :")
+        test.todo("Opt: --searchexclude :")
+        test.todo("Opt: --searchlimit :")
+        test.todo("Opt: --searchopts :")
+        test.todo("Opt: --searchstaleness :")
+        test.todo("Opt: --strict-peer-deps :")
+        test.todo("Opt: --tag :")
+      })
+      
+      describe("Extraneous opts:", () => {
+        test.todo("Opt: - (flag to read arguments from stdin.) :")
+        test.todo("Opt: --bin-links :")
+        test.todo("Opt: --browser :")
+        test.todo("Opt: --ca :")
+        test.todo("Opt: --cache :")
+        test.todo("Opt: --cafile :")
+        test.todo("Opt: --cert :")
+        test.todo("Opt: --ci-name :")
+        test.todo("Opt: --engine-strict :")
+        test.todo("Opt: --fetch-retries :")
+        test.todo("Opt: --fetch-retry-factor :")
+        test.todo("Opt: --fetch-retry-maxtimeout :")
+        test.todo("Opt: --fetch-retry-mintimeout :")
+        test.todo("Opt: --fetch-timeout :")
+        test.todo("Opt: --foreground-scripts :")
+        test.todo("Opt: --fund :")
+        test.todo("Opt: --global | -g :")
+        test.todo("Opt: --global-style :")
+        test.todo("Opt: --globalconfig :")
+        test.todo("Opt: --heading :")
+        test.todo("Opt: --https-proxy :")
+        test.todo("Opt: --if-present :")
+        test.todo("Opt: --ignore-scripts :")
+        test.todo("Opt: --include-staged :")
+        test.todo("Opt: --key :")
+        test.todo("Opt: --local | --no-global :")
+        test.todo("Opt: --local-address:")
+        test.todo("Opt: --noproxy:")
+        test.todo("Opt: --npm-version:")
+        test.todo("Opt: --offline:")
+        test.todo("Opt: --online:")
+        test.todo("Opt: --pack-destination :")
+        test.todo("Opt: --package:")
+        test.todo("Opt: --package-lock :")
+        test.todo("Opt: --package-lock-only :")
+        test.todo("Opt: --prefer-offline:")
+        test.todo("Opt: --prefer-online:")
+        test.todo("Opt: --prefix | -C :")
+        test.todo("Opt: --preid :")
+        test.todo("Opt: --progress :")
+        test.todo("Opt: --proxy:")
+        test.todo("Opt: --readonly | --read-only :")
+        test.todo("Opt: --rebuild-bundle:")
+        test.todo("Opt: --registry | --reg :")
+        test.todo("Opt: --save-prefix :")
+        test.todo("Opt: --scope :")
+        test.todo("Opt: --script-shell :")
+        test.todo("Opt: --shell :")
+        test.todo("Opt: --strict-ssl :")
+        test.todo("Opt: --timing :")
+        test.todo("Opt: --umask :")
+        test.todo("Opt: --unicode :")
+        test.todo("Opt: --update-notifier :")
+        test.todo("Opt: --user-agent :")
+        test.todo("Opt: --userconfig :")
+        test.todo("Opt: --versions :")
+        test.todo("Opt: --viewer :")
+        test.todo("Opt: --which :")
+        test.todo("Opt: --workspace | -w :")
+        test.todo("Opt: --workspaces | --ws :")
+      })
+
+      describe("NPM Deprecated opts:", () => {
+        test.todo("Opt: --also :")
+        test.todo("Opt: --auth-type :")
+        test.todo("Opt: --cache-max :")
+        test.todo("Opt: --cache-min :")
+        test.todo("Opt: --dev :")
+        test.todo("Opt: --only :")
+        test.todo("Opt: --optional :")
+        test.todo("Opt: --production :")
+        test.todo("Opt: --shrinkwrap :")
+        test.todo("Opt: --sso-poll-frequency :")
+        test.todo("Opt: --sso-type :")
+        test.todo("Opt: --tmp :")
       })
     })
   })

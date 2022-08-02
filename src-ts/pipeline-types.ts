@@ -80,15 +80,27 @@ export type Trace = {
 }
 
 
-/** @summary the behavioral settings tfor the  `Op`  and the  `OpsPipeline` */
+/** @summary the behavioral settings for the  `Op`  and the  `OpsPipeline` */
 export interface EnvSettings {
-  useDebug?: boolean
   useShell?: boolean
+  /** @todo */
+  useSilent?: boolean
+  /** @todo */
+  useLog?: boolean
+  useVerbose?: boolean
+  useDebug?: boolean
+  useLoopback?: boolean
   description?: string
 }
 
 export interface OpsQueueEnvSettings extends EnvSettings {
+  /** @todo */
+  useNestingSilent?: boolean
+  /** @todo */
+  useNestingLog?: boolean
+  useNestingVerbose?: boolean
   useNestingDebug?: boolean
+  useEmptyLoopback?: boolean
 }
 
 
@@ -147,7 +159,7 @@ export type QueueableOpLike = QueueableOpsPipeline | OpCaller
 export interface ImmutablePipeline {
   isMutable: false
   traceback(...arg0: unknown[]): ReturnType<TraceBack> | undefined
-  start(...arg0: unknown[]): OpResult
+  start(...arg0: any[]): OpResult
   lock(...arg0: unknown[]): ImmutablePipeline
 }
 

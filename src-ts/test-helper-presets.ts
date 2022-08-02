@@ -30,6 +30,7 @@ const exitCodeFailureDefault: Output["exitCode"] = 1
 
 // OpsPipeline Evnironment default, immutable:
 const pipelineEnvDefault: OpsQueueEnvSettings = Object.freeze({
+  useLoopback: false,
   useDebug: false,
   useNestingDebug: false,
   useShell: false,
@@ -83,22 +84,22 @@ const loStdFnV: TestV = [
   [
     loFn, 
     pipeSucessDefault, 
-    defOut({ pipe: pipeSucessDefault })
+    defOut({ pipe: [pipeSucessDefault] })
   ],
   [
     loArrow, 
     pipeSucessDefault, 
-    defOut({ pipe: pipeSucessDefault })
+    defOut({ pipe: [pipeSucessDefault] })
   ],
   [
     loAsyncFn, 
     pipeSucessDefault, 
-    defOut({ pipe: pipeSucessDefault })
+    defOut({ pipe: [pipeSucessDefault] })
   ],
   [
     loAsyncArrow, 
     pipeSucessDefault, 
-    defOut({ pipe: pipeSucessDefault })
+    defOut({ pipe: [pipeSucessDefault] })
   ]
 ]
 

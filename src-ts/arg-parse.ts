@@ -1,39 +1,42 @@
 import { Command, createCommand, Option } from "commander"
 import { argvSanitize } from "./arg-parse-utils"
 import { OpsPipeline } from "./op-queue-pipeline"
+export { Command } from "commander"
 
 /**
  * @fileoverview - Read the CLI input to get commands, arguments, and options.
  */
 
 /** */
-export const argParser = (argv: string[], parser: Command, pipeline: OpsPipeline = new OpsPipeline("arg-parse")) => {
-  // use only the user input, not the node path or executable name:
-  if (argv === process.argv) argv = argv.slice(2)
-
-  // use only the sanitized options and parse the options and arguments:
-  return pipeline
-   .pipe(argv => argvSanitize(argv), "sanitize input")
-   .pipe(args => parser.parse(args, { from: "user" }), "parse commands, arguments, and options")
-   .start(argv)
+const verboseHandler = (placeholder: unknown, previousVerbosityLevel: number) => {
+  void placeholder // used to satisfy typescript
+  return Number(previousVerbosityLevel) + 1
 }
-
-/**  */
-export const commander = createCommand("npm-super-pack")
- .version("0.0.1")
+const dbgHandler = (placeholder: unknown, previousDebugLevel: number) => {
+  void placeholder // used to satisfy typescript
+  return Number(previousDebugLevel) + 1
+}
+/**
+ * 
+ */
+ export const commander = createCommand("npm-super-pack")
+ .version("0.1.0")
  .description("A program to install NPM packages offline.")
+ .combineFlagAndOptionalValue(false) // disable non-standard/uncommon option formats that cause unwanted conflicts with other options
+//  .exitOverride() // disable Commander directly aborting Node.js process by exit on error itself
  .usage("[options] package [packages...]")
- .usage("[options] package [packages...] [--dest|--save] path")
- .usage("[options] /path/to/package [/path/to/packages...]")
+ .usage("[options] package [packages...] [--dest|--save [path]]")
+// .usage("[options] path [path...]") /** @TODO */
  .argument("<package>", "The NPM package to install, is also used for installing offline packages.")
- .argument("[path]", "The file location the NPM package will be downloaded to.")
- .addOption(
-  new Option("--production, --production=[boolean]", "If true, save only the production dependencies of the package(s). If no argument is supplied it defaults to true.")
+//  .argument("[path]", "The file location the NPM package will be downloaded to.") /** @TODO */
+ /* .addOption(
+  new Option("--production=[boolean], --production", "If true, save only the production dependencies of the package(s)")
    .choices(["true", "false"])
    .default("true")
- )
+ ) */
+ .option("--production=[boolean], --production", "If true, save only the production dependencies of the package(s)")
  .addOption(
-  new Option("-P, --save-prod, --production, --production=true", "Save the production dependencies of the package(s).")
+  new Option("-P, --save-prod, --production=true, --production", "Save the production dependencies of the package(s).")
  )
  .addOption(
   new Option("-B, --save-bundle", "Save the bundled dependencies of the package(s), this is the normal behavior of npm pack.")
@@ -50,21 +53,21 @@ export const commander = createCommand("npm-super-pack")
   new Option("--save-peer", "Save the peer dependencies of the package(s).")
    .implies({ saveProd: true })
  )
- .addOption(
-  new Option("--save <path>, --dest <path>, --pack-destination <path>, --package-destination <path>", "Install package to file system location, also saves package to NPM's internal cache (_cacache).")
-   .conflicts("noSave")
- )
- .addOption(
-  new Option("--no-save", "Does not install package, only saves package to NPM's internal cache (\"_cacache\").")
-   .conflicts("save")
- )
+ .addOption(new Option("--save <path>", "Install package to file system location, also saves package to NPM's internal cache (_cacache).").conflicts("noSave"))
+ .addOption(new Option("--dest <path>", "Install package to file system location, also saves package to NPM's internal cache (_cacache).").conflicts("noSave"))
+ .addOption(new Option("--pack-destination <path>", "Install package to file system location, also saves package to NPM's internal cache (_cacache).").conflicts("noSave"))
+ .addOption(new Option("--package-destination <path>", "Install package to file system location, also saves package to NPM's internal cache (_cacache).").conflicts("noSave"))
+ .addOption(new Option("--no-save", "Does not install package, only saves package to NPM's internal cache (\"_cacache\").").conflicts("save"))
  .option("-E, --save-exact", "Saved dependencies will be configured with an exact version rather than using NPM's default semver range operator.")
  .option("-n, --dry-run", "Do not actually do anything, just print what would be done.")
  .option("-f, --force", "Override any warnings.")
- .option("-v, --verbose", "Print extra information.")
+ .option("-v, --verbose", "Print extra information.", verboseHandler, 0)
  .addOption(
-  new Option("--debug", "Print debug information.")
+  new Option("--debug", "Print debug information, use repeatedly to print more information.")
    .implies({ verbose: true })
+   .argParser(dbgHandler)
+   .default(0)
+   .preset(0)
  )
  .option("--legacy-bundling", "Eliminates all automatic deduping and causes npm to install the package such that versions of npm prior to 1.4, such as the one included with node 0.8, can install the package.")
  .addOption(
@@ -90,16 +93,18 @@ export const commander = createCommand("npm-super-pack")
  .option("--proxy [url]", "A proxy to use for outgoing http requests. If the NPM HTTP_PROXY or http_proxy environment variables are set, proxy settings will be honored by NPM's underlying request library.")
  .option("--https-proxy [url]", "A proxy to use for outgoing https requests. If the NPM HTTPS_PROXY or https_proxy or HTTP_PROXY or http_proxy environment variables are set, proxy settings will be honored by the underlying make-fetch-happen library.")
  .option("--no-proxy <domain extentions...>, --noproxy <domain extentions...>", "Domain extensions that should bypass any proxies, (can be set multiple times). Also accepts a comma-delimited string. The default value is the NPM NO_PROXY environment variable.")
- .addOption(
-  new Option("--progress, --progress=[boolean]", "Display download and install progress reports. Default true.")
+ /* .addOption(
+  new Option("--progress=[boolean], --progress", "Display download and install progress reports. Default true.")
    .choices(["true", "false"])
    .default("true")
- )
- .addOption(
-  new Option("--ignore-scripts <boolean>", "If true, npm does not run scripts specified in package.json files. Note that commands explicitly intended to run a particular script, such as npm start, npm stop, npm restart, npm test, and npm run-script will still run their intended script if ignore-scripts is set, but they will not run any pre-scripts or post-scripts.")
+ ) */
+ .option("--progress=[boolean], --progress", "Display download and install progress reports. Default true.")
+ /* .addOption(
+  new Option("--ignore-scripts <boolean>", "If true, npm does not run scripts specified in package.json files. Note that commands explicitly intended to run a particular script, such as npm start, npm stop, npm restart, npm test, and npm run-script will still run their intended script if ignore-scripts is set, but they will not run any pre-scripts or post-scripts. Default false.")
    .choices(["true", "false"])
    .default("false")
- )
+ ) */
+ .option("--ignore-scripts <boolean>", "If true, npm does not run scripts specified in package.json files. Note that commands explicitly intended to run a particular script, such as npm start, npm stop, npm restart, npm test, and npm run-script will still run their intended script if ignore-scripts is set, but they will not run any pre-scripts or post-scripts. Default false.")
  .option("--no-progress", "Eliminates all progress reporting.")
  .option("--prefer-online", "If true, NPM staleness checks for cached data will be forced, always looking for fresh package data.")
  .option("--prefer-offline", "If true, NPM staleness checks for cached data will be bypassed, but missing data will be requested from the server. To force full offline mode, use --offline.")
@@ -108,14 +113,59 @@ export const commander = createCommand("npm-super-pack")
  .option("--node-version", "The nodeJS version to use when checking a package's \"engines\" setting.")
  .option("--max-sockets <number>, --maxsockets <number>", "The maximum number of connections to use per origin (protocol/host/port combination).")
  .option("--foreground-scripts", "Run all NPM build scripts (preinstall, install, and postinstall) for installed packages in the foreground process, sharing standard input, output, and error with the main NPM process. Note that this will generally make installs run slower, and be much noisier, but can be useful for debugging.")
- .addOption(
+ /* .addOption(
   new Option("--loglevel <level>, --log-level <level>, --npm-log-level <level>","")
    .choices(["silent", "error", "warn", "notice", "http", "timing", "info", "verbose", "silly"])
    .default("notice")
+ ) */
+ .addOption(
+  new Option("--loglevel <level>, --log-level <level>, --npm-log-level <level>","The logging detail NPM uses.")
+   .choices(["silent", "error", "warn", "notice", "http", "timing", "info", "verbose", "silly"])
  )
 
 
-export const options = argParser(process.argv.slice(2), commander) 
+/**
+ * 
+ */
+export const argParserQ = new OpsPipeline("Argument Parser"/* , { useDebug: true, useVerbose: false } */)
+  .pipe(({ argv, parser }: { argv: string[], parser: Command }) => {
+    // use only the user input, not the node path or executable name:
+    if (argv === process.argv) argv = argv.slice(2)
+    
+    return {
+      argv,
+      parser
+    }
+  }, "Prepare ArgV")
+  .pipe(({ argv, parser }: { argv: string[], parser: Command }) => {
+    return {
+      args: argvSanitize(argv),
+      parser
+    }
+  }, "Input Sanitization")
+  .pipe(({ args, parser }: { args: string[], parser: Command }) => {
+    return parser.parse(args, { from: "user" })
+  }, "Parsing Commands, Arguments, And Options")
+
+/**
+ * 
+ */
+export const argParser = (argv: string[] = process.argv, parser: Command = commander, Q: OpsPipeline = argParserQ) => {
+  // use only the sanitized options and parse the options and arguments:
+  return Q.start({ argv, parser })
+}
+
+/** 
+ * 
+ */
+export const command = async (argv: string[] = process.argv.slice(2)): Promise<Command> => {
+  return (await argParser(argv, commander)).pipe[0] as Command
+}
+
+/** 
+ * 
+ */
+export const options = (command)()
 
 /*
 NPM package.json: (excerpt)

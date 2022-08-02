@@ -20,6 +20,9 @@ Error output:  `
 */
 const defDbg = false
 const defSh = false
+const deflo = false
+const defV = false
+const defEnv = { useLoopback: deflo, useVerbose: defV, useShell: defSh, useDebug: defDbg , description: defDesc }
 /**
  * @description - An Op is a neat little wrapper function for error handling.
  * @param fn the function to wrap in the Op
@@ -27,7 +30,7 @@ const defSh = false
  * @param environment 
  * @returns {Promise<Output>} 
  */
-export const op: Op = async (fn: Operation, input: Input, { useShell = defSh, useDebug = defDbg, description = defDesc }: EnvSettings = { useShell: defSh, useDebug: defDbg , description: defDesc }): Promise<Output> => {
+export const op: Op = async (fn: Operation, input: Input, { useLoopback = deflo, useShell = defSh, useDebug = defDbg, description = defDesc, useVerbose = false }: EnvSettings = defEnv): Promise<Output> => {
   
   // the return value:
   const output: Output = {
@@ -38,14 +41,30 @@ export const op: Op = async (fn: Operation, input: Input, { useShell = defSh, us
   }
   
   try {
+    // try to make verbose log output, fails silently:
+    try {
+      if (useVerbose) {
+        console.log(`Starting Operation: "${description}"`)
+        if (useDebug) console.log("\t",input, ...input)
+      }
+    } catch (silentError){}
+    
     // try the function operation:
     const result = await fn(...input)
-
-    // save the output to the pipe, and make it an array if it is not an array:
-    output.pipe = result instanceof Array ? result : [ result ]
-
+    
+    // save the output to the pipe:
+    output.pipe = useLoopback ? result : [ result ]
+    
     // it did not error, so it was successful:
     output.exitCode = 0
+    
+    // try to make verbose log output, fails silently:
+    try {
+      if (useVerbose) {
+        console.log(`Finished Operation: "${description}"`)
+        if (useDebug) console.log("\t", result)
+      }
+    } catch (silentError){}
   }
   catch (e) {
     /** @todo - figure out how to make more useful error codes. */
@@ -55,10 +74,10 @@ export const op: Op = async (fn: Operation, input: Input, { useShell = defSh, us
     // if a shell fuction failed, save the  `child_process`  Error exit code status:
     if (useShell && typeof e === "object" && e !== null) {
       if ("status" in e && typeof (e as {status: number}).status === "number") {
-        output.exitCode = (e as Record<string,unknown> & {status: number}).status // as statement used to satisfy TS.
+        output.exitCode = (e as {status: number}).status // as statement used to satisfy TS.
       }
       else if ("code" in e && typeof (e as {code: number}).code === "number") {
-        output.exitCode = (e as Record<string,unknown> & {code: number}).code // as statement used to satisfy TS.
+        output.exitCode = (e as {code: number}).code // as statement used to satisfy TS.
       }
     }
 
@@ -98,27 +117,38 @@ export const opCurry: OpCurrier = (fn: Operation, env?: EnvSettings): OpCaller =
  * @todo Add debuggers.
  * @todo Add compat for Ops with preset input.
  */
-export class OpsPipeline implements Pipeline<OpsPipeline> {
+export class OpsPipeline/** @TODO <Input Type, Output Type> */ implements Pipeline<OpsPipeline> {
   isMutable = true 
   private queue: OpsQueue = []
   private fallbackOps: FlOpsQueue = new WeakMap()
   private trace?: Trace
   private isPipelineFlagSet: WeakSet<QueueableOpsPipeline> = new WeakSet()
-  private readonly env: OpsQueueEnvSettings
+  private env: OpsQueueEnvSettings
 
   constructor(description: string, env?: Omit<OpsQueueEnvSettings, "description">){
     
     // set the environment settings changed from the defaults.
     // freeze the object to prevet it from being changed while the pipeline is running.
     this.env = Object.freeze(Object.assign({ 
-      useShell: false, 
-      useDebug: false, 
-      useNestingDebug: false,
-      description
-    },
+        useLoopback: false, 
+        useShell: false, 
+        useDebug: false, 
+        useEmptyLoopback: true,
+        useNestingDebug: false,
+        description
+      },
       env,
+      (env && env.useNestingLog && !env.useLog /*is falsy*/ && {
+        useLog: env.useNestingLog // <- Here to prevent bug where nested logging isn't active because `useLog` isn't also true.
+      }),
+      (env && env.useNestingVerbose && !env.useVerbose /*is falsy*/ && {
+        useVerbose: env.useNestingVerbose // <- Here to prevent bug where nested verbose isn't logged because `useVerbose` isn't also true.
+      }),
       (env && env.useNestingDebug && !env.useDebug /*is falsy*/ && {
         useDebug: env.useNestingDebug // <- Here to prevent bug where nested debug isn't collected because `useDebug` isn't also true.
+      }),
+      (env && env.useNestingSilent && !env.useSilent /*is falsy*/ && {
+        useSilent: env.useNestingSilent // <- Here to prevent bug where nested silent still allows logging because `useSilent` isn't also true.
       })
     ))
 
@@ -152,11 +182,28 @@ export class OpsPipeline implements Pipeline<OpsPipeline> {
    *     // by using  .nest()  only INTERNALLY to make it a compatible format for the containing pipeline
    *  )
    */
-  private nest(): QueueableOpsPipeline {
+  private nest({ useNestingDebug = false, useNestingVerbose = false, useNestingLog = false, useNestingSilent = false }: OpsQueueEnvSettings = { useNestingDebug: false, useNestingVerbose: false, useLog: false, useNestingSilent: false }): QueueableOpsPipeline {
+    // enable debug or verbose if nested settings are enabled:
+    this.env = Object.freeze({
+      ...this.env,
+      // use debug mode nesting:
+      useDebug: useNestingDebug || this.env.useDebug,
+      useNestingDebug: useNestingDebug || this.env.useNestingDebug,
+      // use verbose mode nesting:
+      useVerbose: useNestingVerbose || this.env.useVerbose,
+      useNestingVerbose: useNestingVerbose || this.env.useNestingVerbose,
+      // use logging mode nesting:
+      useLog: useNestingLog || this.env.useLog,
+      useNestingLog: useNestingLog || this.env.useNestingLog,
+      // use silent mode nesting:
+      useSilent: useNestingSilent || this.env.useSilent,
+      useNestingSilent: useNestingSilent || this.env.useNestingSilent
+    })
     // prevent any more Ops from being added after the entire Pipeline is added to another Pipeline,
+    this.lock()
     // and return callable version.
     return async (input: Input) => {
-      return this.lock().start(input)
+      return this.start(...input)
     }
   }
 
@@ -168,7 +215,7 @@ export class OpsPipeline implements Pipeline<OpsPipeline> {
     // check if an OpsPipeline is being added to the OpsQueue:
     if (operation instanceof OpsPipeline) {
       // lock the pipeline and make it callable:
-      const queueOpsPl = operation.nest()
+      const queueOpsPl = operation.nest(this.env)
 
       // used by the debugger:
       this.isPipelineFlagSet.add(queueOpsPl)
@@ -199,8 +246,8 @@ export class OpsPipeline implements Pipeline<OpsPipeline> {
    *  .pipe(fnDoStuff)
    *  .start(initDataInput)
    */
-  pipe(operation: OpsPipeline): this
   pipe(operation: Operation, description: string, envExtras?: Omit<EnvSettings, "description">): this
+  pipe(operation: OpsPipeline): this
   pipe(operation: Operation | OpsPipeline, description?: string, envExtras?: Omit<EnvSettings, "description">): this {
     if (!this.isMutable) throw Error(`Attempted to add fallback Operation to a locked Pipeline.`) // return this
     
@@ -294,8 +341,8 @@ export class OpsPipeline implements Pipeline<OpsPipeline> {
    *  )
    *  .start(input) // <- THIS WILL NOT DO ANYTHING!
    */
-  fallback(fallback: OpsPipeline): this
   fallback(fallback: Operation, description: string, envExtras?: Omit<EnvSettings, "description">): this
+  fallback(fallback: OpsPipeline): this
   fallback(fallback: OpsPipeline | Operation, description?: string, envExtras?: Omit<EnvSettings, "description">): this {
     if (!this.isMutable) throw Error(`Attempted to add fallback Operation to a locked Pipeline.`) // return this
     if (this.queue.length < 1) return this //  throw Error(`Attempted to add fallback Operation without a setting a preceeding Operation in the Pipeline.`)
@@ -376,7 +423,7 @@ export class OpsPipeline implements Pipeline<OpsPipeline> {
     Object.freeze(this.fallbackOps)
 
     // // the methods that add to the pipeline queue are on the `.prototype` or `__proto__`,
-    // // so make properties irectly oin the object
+    // // so make properties directly on the object undefined to throw errors
     // this.pipe = undefined
     // this.fallback = undefined
     
@@ -395,7 +442,7 @@ export class OpsPipeline implements Pipeline<OpsPipeline> {
   /** 
    * @summary Takes an Array of arguments to give to the Operation being piped to in the Pipeline 
    */
-  async start(input: Input): Promise<Output> {
+  async start(...input: Input): Promise<Output> {
     // prevent any more Ops from being added to the pipeline
     // by removing all Op adding functions from the pipeline,
     // and preventing the OpsQueue and FlOpsQueue from being appended at either the Op adding methods's side, or the Array-like holders themselves.
@@ -413,6 +460,12 @@ export class OpsPipeline implements Pipeline<OpsPipeline> {
     // 1): to use a  throw  statement to error out of loop after an Op reports unrecoverable failure an there's no fallback for it.
     // 2): just in case the Op throws, even though Ops should not throw any errors as they have a  try..catch  for themselves.
     try {
+      // verbose logs:
+      if (this.env.useVerbose) {
+        console.log(`Starting Pipeline: "${this.env.description}"`)
+        if (this.env.useDebug) console.log("\t", input)
+      }
+
       // loop through every Op in the Queue, and put it in the Pipeline:
       for (const nextOp of this.queue) {
         
@@ -524,14 +577,21 @@ Name of the Operation Pipeline that failed: "${this.env.description}"
 Error exit code: ${pipelineOutputValve.exitCode}
 Error output:  ${pipelineOutputValve.errorMsg}`
 
-      if (this.env.useDebug) console.error(pipelineOutputValve.errorMsg)
+      // log error message for CLI app, verbose mode, and debug mode:
+      if (!this.env.useSilent && (this.env.useLog || this.env.useShell || this.env.useDebug || this.env.useVerbose)) console.error(pipelineOutputValve.errorMsg)
     }
     finally {
+      // verbose logs:
+      if (this.env.useVerbose) {
+        console.log(`Finished Pipeline: "${this.env.description}"`)
+        if (this.env.useDebug) console.log("\t", pipelineOutputValve.pipe)
+      }
+
       // save debugging trace:
       if (this.env.useDebug && this.trace && typeof this.trace === "object") pipelineOutputValve.debugBackTrace = this.trace
       
       // save final output:
-      pipelineOutputValve.pipe = input
+      pipelineOutputValve.pipe = (this.env.useEmptyLoopback && this.queue.length === 0 && input[0] instanceof Array) ? input[0] : input
 
       // return the finished output:
       return pipelineOutputValve

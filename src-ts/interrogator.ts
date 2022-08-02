@@ -1,5 +1,5 @@
 import { AsyncReadline as rl } from "./custom-utils"
-import { ReadDefaultAnswer, SetDefaultAnswer, Answer, PromptAnswer } from "./answer"
+import { ReadDefaultAnswer, SetDefaultAnswer, Answer/* , PromptAnswer */ } from "./answer"
 export { Answer } from "./answer"
 /** 
  * @debrief - This module coerces user responces to a yes or no answer object.

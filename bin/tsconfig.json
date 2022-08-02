@@ -1,0 +1,15 @@
+{
+  "extends": "../tsconfig.json",
+  "include": ["./"],
+  "exclude": ["*.d.ts"],
+  "references": [
+    {
+      "path": "../src-ts"
+    }
+  ],
+  "compilerOptions": {
+    "rootDir": "./",
+    "outDir": "./",
+    "composite": true
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "extends": "../tsconfig.json",
+  "include": ["./"],
+  "references": [
+    {
+      "path": "../bin"
+    },
+    {
+      "path": "../src-ts"
+    }
+  ],
+  "compilerOptions": {
+    "rootDir": "./",
+    "outFile": "bundle",
+    "sourceMap": false,
+    "noEmit": true,
+    "declaration": false,
+    "composite": true
+  }
+}

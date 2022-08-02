@@ -7,9 +7,9 @@ exports.FallbackOpQueuePipelineError = exports.OpQueuePipelineError = exports.De
  * @type ErrorCode: Should be an 32-bit integer.
  */
 class ExitCodeError extends Error {
+    code = 1; // non-zero means error.
     constructor(messageOrExitCode, exitCode) {
         super();
-        this.code = 1; // non-zero means error.
         // set msg and exit-code:
         if (typeof messageOrExitCode === "number")
             this.code = Number(messageOrExitCode) << 0; // bit-wise shift by 0 is used to make it a 32-bit integer, without changing the vaule... to much.
@@ -30,9 +30,9 @@ exports.ExitCodeError = ExitCodeError;
  */
 // unused for now, may be extended by the functions an Op calls...
 class OperationError extends ExitCodeError {
+    code = 1; // non-zero means error.
     constructor(messageOrExitCode, exitCodeAfterMessage) {
         super();
-        this.code = 1; // non-zero means error.
         // set msg and exit-code:
         if (typeof messageOrExitCode === "number")
             this.code = Number(messageOrExitCode) << 0; // bit-wise shift by 0 is used to make it a 32-bit integer, without changing the vaule... to much.
@@ -47,10 +47,10 @@ class OperationError extends ExitCodeError {
     }
     static extend(errorTypeName, defaultErrorCode, defaultErrorMessage) {
         return class CustomInternalOperationError extends OperationError {
+            code = defaultErrorCode ?? 1; // non-zero integer means error.
+            message = defaultErrorMessage ?? "";
             constructor(messageOrExitCode, exitCodeAfterMessage) {
                 super(messageOrExitCode, exitCodeAfterMessage);
-                this.code = defaultErrorCode ?? 1; // non-zero integer means error.
-                this.message = defaultErrorMessage ?? "";
                 // set the name of the error type:
                 this.name = `${errorTypeName}`;
             }
@@ -114,3 +114,4 @@ class FallbackOpQueuePipelineError extends OpQueuePipelineError {
     }
 }
 exports.FallbackOpQueuePipelineError = FallbackOpQueuePipelineError;
+//# sourceMappingURL=custom-error.js.map

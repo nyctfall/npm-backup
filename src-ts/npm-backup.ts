@@ -1,6 +1,3 @@
-// import fsPromises from "fs/promises"
-// import { tmpdir } from "os"
-// import { posix } from "path"
 import { promisify } from "util"
 import { /* execSync as bufferExecSync, */ /* exec as callbackExec, */ /* execFileSync as bufferExecFileSync, */ execFile as callbackExecFile, /* ExecFileSyncOptions */ } from "child_process"
 import { createInterface/* , Interface */ } from "readline"

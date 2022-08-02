@@ -91,7 +91,9 @@ describe("The `Op` chaining Pipeline class, it calls `OpCurriers` that then call
           description: "", 
           useDebug: true, 
           useNestingDebug: false, 
-          useShell: false
+          useShell: false,
+          useEmptyLoopback: true,
+          useLoopback: false
         },
         enqueueChildDescriptions: [],
         enqueueInstanceInfo: [],
@@ -127,7 +129,9 @@ describe("The `Op` chaining Pipeline class, it calls `OpCurriers` that then call
           description: "", 
           useShell: false, 
           useDebug: true, 
-          useNestingDebug: true
+          useNestingDebug: true,
+          useEmptyLoopback: true,
+          useLoopback: false
         },
         enqueueChildDescriptions: [],
         enqueueInstanceInfo: [],
@@ -137,6 +141,40 @@ describe("The `Op` chaining Pipeline class, it calls `OpCurriers` that then call
         pipelineOutputs: [],
         nestedTraces: []
       } as Trace))
+    })
+
+    test("`useLoopback` environment settings...", async () => {
+      const input = [0]
+      const pl = new OpsPipeline("", { useLoopback: true })
+      const outputTest = await pl.pipe(arg => arg,"").start(input)
+      
+      expect(outputTest).toStrictEqual(expect.objectContaining({
+        exitCode: 0,
+        pipe: input,
+        error: Error(),
+        errorMsg: ""
+      } as Output as Record<string,any>))
+      expect(outputTest).toHaveProperty("pipe" as keyof Output, input)
+      expect(outputTest.pipe).toBe(input)
+      expect(outputTest.pipe).toEqual(input)
+      expect(outputTest.pipe).toStrictEqual(input)
+    })
+
+    test("`useEmptyLoopback` environment settings...", async () => {
+      const input = [0]
+      const pl = new OpsPipeline("", { useEmptyLoopback: false })
+      const outputTest = await pl.start(input)
+      
+      expect(outputTest).toStrictEqual(expect.objectContaining({
+        exitCode: 0,
+        pipe: [ input ],
+        error: Error(),
+        errorMsg: ""
+      } as Output as Record<string,any>))
+      expect(outputTest).toHaveProperty("pipe" as keyof Output, [ input ])
+      expect(outputTest.pipe[0]).toBe(input)
+      expect(outputTest.pipe[0]).toEqual(input)
+      expect(outputTest.pipe[0]).toStrictEqual(input)
     })
     
     describe("introspection into the `private` TS properties of an empty OpsPipeline.", () => {
@@ -157,11 +195,13 @@ describe("The `Op` chaining Pipeline class, it calls `OpCurriers` that then call
           useShell: false, 
           useDebug: false, 
           useNestingDebug: false, 
+          useEmptyLoopback: true, 
+          useLoopback: false, 
           description: "" 
         } as OpsQueueEnvSettings)
         
         // there should be not Trace object, if it wasn't requested in the env settings:
-        expect(pl).not.toHaveProperty("trace" as keyof OpsPipeline)
+        expect(pl).toHaveProperty("trace" as keyof OpsPipeline, undefined)
         
         // methods:
         expect(Object.getPrototypeOf(pl).pipe).toBeInstanceOf(Function)
@@ -224,11 +264,13 @@ describe("The `Op` chaining Pipeline class, it calls `OpCurriers` that then call
           useShell: true, 
           useDebug: false, 
           useNestingDebug: false, 
+          useEmptyLoopback: true, 
+          useLoopback: false, 
           description: "" 
         } as OpsQueueEnvSettings)
         
         // there should be not Trace object, if it wasn't requested in the env settings:
-        expect(pl).not.toHaveProperty("trace" as keyof OpsPipeline)
+        expect(pl).toHaveProperty("trace" as keyof OpsPipeline, undefined)
         
         // methods:
         expect(Object.getPrototypeOf(pl).pipe).toBeInstanceOf(Function)
@@ -291,11 +333,13 @@ describe("The `Op` chaining Pipeline class, it calls `OpCurriers` that then call
           useDebug: false, 
           useShell: false, 
           useNestingDebug: false, 
+          useEmptyLoopback: true, 
+          useLoopback: false, 
           description: "pl-desc" 
         } as OpsQueueEnvSettings)
         
         // there should be not Trace object, if it wasn't requested in the env settings:
-        expect(pl).not.toHaveProperty("trace" as keyof OpsPipeline)
+        expect(pl).toHaveProperty("trace" as keyof OpsPipeline, undefined)
         
         // methods:
         expect(Object.getPrototypeOf(pl).pipe).toBeInstanceOf(Function)
@@ -358,6 +402,8 @@ describe("The `Op` chaining Pipeline class, it calls `OpCurriers` that then call
           useDebug: true, 
           useShell: false, 
           useNestingDebug: false, 
+          useEmptyLoopback: true, 
+          useLoopback: false, 
           description: "" 
         } as OpsQueueEnvSettings)
         
@@ -412,6 +458,8 @@ describe("The `Op` chaining Pipeline class, it calls `OpCurriers` that then call
             description: "", 
             useDebug: true, 
             useNestingDebug: false, 
+            useEmptyLoopback: true, 
+            useLoopback: false, 
             useShell: false
           },
           enqueueChildDescriptions: [],
@@ -442,6 +490,8 @@ describe("The `Op` chaining Pipeline class, it calls `OpCurriers` that then call
           useDebug: true, 
           useNestingDebug: true, 
           useShell: false, 
+          useEmptyLoopback: true, 
+          useLoopback: false, 
           description: "" 
         } as OpsQueueEnvSettings)
         
@@ -497,6 +547,8 @@ describe("The `Op` chaining Pipeline class, it calls `OpCurriers` that then call
             description: "", 
             useDebug: true, 
             useNestingDebug: true, 
+            useEmptyLoopback: true, 
+            useLoopback: false, 
             useShell: false
           },
           enqueueChildDescriptions: [],
@@ -518,7 +570,7 @@ describe("The `Op` chaining Pipeline class, it calls `OpCurriers` that then call
     
     describe("Sucessful Op:", () => {
       test.each(loStdFnV)("Fuzzing: %#: %p", async (fn, input, output) => {
-        const result: Output = await new OpsPipeline("").pipe(fn, "").start(input)
+        const result: Output = await new OpsPipeline("", {useLoopback:true}).pipe(fn, "").start(input)
 
         expect(result).toStrictEqual(output)
       })
@@ -526,7 +578,7 @@ describe("The `Op` chaining Pipeline class, it calls `OpCurriers` that then call
 
     describe("Failing Op:", () => {
       test.each(errStdFnV)("Fuzzing: %#: %p", async (fn, input, output) => {
-        const result: Output = await new OpsPipeline("").pipe(fn, "").start(input)
+        const result: Output = await new OpsPipeline("", {useLoopback:true}).pipe(fn, "").start(input)
 
         expect(result).toStrictEqual({
           ...output,
@@ -538,7 +590,7 @@ Error output:  ERROR! Error type: Error
 Name of the Operation that failed: \"\"
 Error exit code: 1
 Error output: Error`,
-            pipe: [undefined]
+            pipe: [ [ undefined ] ]
           })
       })
     })
@@ -583,7 +635,7 @@ Error output: Error`,
       
       describe("Failing Main Op, failing fallback Op:", () => {
         test.each(errStdFnV)("Fuzzing: %#: %p", async (fn, input, output) => {
-          const result: Output = await new OpsPipeline("PL").pipe(fn,"Op").fallback(fn, "FlOp").start(input)
+          const result: Output = await new OpsPipeline("PL", {useLoopback:true}).pipe(fn,"Op").fallback(fn, "FlOp").start(input)
 
           expect(result).toStrictEqual({
             ...output,
@@ -595,7 +647,7 @@ Error output:  ERROR! Error type: Error
 Name of the Operation that failed: \"FlOp\"
 Error exit code: 1
 Error output: Error`,
-            pipe: input
+            pipe: [input]
           })
         })
       })
@@ -669,7 +721,7 @@ Error output: Error`,
       
       describe("Nested Pipeline: Failing Main Op, failing fallback Op:", () => {
         test.each(errStdFnV)("Fuzzing: %#: %p", async (fn, input, output) => {
-          const result: Output = await new OpsPipeline("").pipe(
+          const result: Output = await new OpsPipeline("", {useLoopback: true}).pipe(
             new OpsPipeline("")
              .pipe(fn,"")
              .fallback(fn, "")
@@ -688,7 +740,7 @@ Name of the Operation that failed: \"\"
 Error exit code: 1
 Error output: Error`,
             error: Error("ERROR: Operations Pipeline had an unrecoverable failure: The main Operation failed, and there was no fallback Operation for it."),
-            pipe: input
+            pipe: [input]
           })
         })
       })

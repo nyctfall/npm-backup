@@ -20,6 +20,9 @@ export const argSanitize = (rawArg: string): string => {
 
 // this sanitizes an array of string args for NPM:
 export const argvSanitize = (rawArgv: string[]): string[] => {
+  // return empty array, since they're falsy just like null and undefined:
+  if (!rawArgv) return rawArgv
+
   // create a sanitized array of the string array:
   // for each string arg, return a sanitized string.
   const sanArgv: string[] = rawArgv.map(argSanitize);

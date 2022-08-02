@@ -29,6 +29,7 @@ const exitCodeFailureDefault = 1;
 exports.exitCodeFailureDefault = exitCodeFailureDefault;
 // OpsPipeline Evnironment default, immutable:
 const pipelineEnvDefault = Object.freeze({
+    useLoopback: false,
     useDebug: false,
     useNestingDebug: false,
     useShell: false,
@@ -80,22 +81,22 @@ const loStdFnV = [
     [
         loFn,
         pipeSucessDefault,
-        defOut({ pipe: pipeSucessDefault })
+        defOut({ pipe: [pipeSucessDefault] })
     ],
     [
         loArrow,
         pipeSucessDefault,
-        defOut({ pipe: pipeSucessDefault })
+        defOut({ pipe: [pipeSucessDefault] })
     ],
     [
         loAsyncFn,
         pipeSucessDefault,
-        defOut({ pipe: pipeSucessDefault })
+        defOut({ pipe: [pipeSucessDefault] })
     ],
     [
         loAsyncArrow,
         pipeSucessDefault,
-        defOut({ pipe: pipeSucessDefault })
+        defOut({ pipe: [pipeSucessDefault] })
     ]
 ];
 exports.loStdFnV = loStdFnV;
@@ -163,3 +164,4 @@ const errStdFnV = [
     ]
 ];
 exports.errStdFnV = errStdFnV;
+//# sourceMappingURL=test-helper-presets.js.map

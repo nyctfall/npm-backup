@@ -1,19 +1,5 @@
 "use strict";
-var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
-    if (kind === "m") throw new TypeError("Private method is not writable");
-    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
-};
-var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
-    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-// import fsPromises from "fs/promises"
-// import { tmpdir } from "os"
-// import { posix } from "path"
 const util_1 = require("util");
 const child_process_1 = require("child_process");
 const readline_1 = require("readline");
@@ -63,7 +49,6 @@ const readline_1 = require("readline");
          * mv pkg backups to target dir
      *
     */
-    var _NPMPkg__identifier, _Confirmer__defaultAnswer;
     const { argv, /* chdir ,*/ cwd, stdin, stdout } = process;
     // const { dirname, basename, extname, format, isAbsolute, join, normalize, parse, relative, resolve, sep } = posix
     // const { readFile, writeFile, rename, access, mkdir, mkdtemp, open, opendir, readdir, rmdir, rm } = fsPromises
@@ -100,17 +85,29 @@ const readline_1 = require("readline");
     };
     // sanitized NPM pkg string object:
     class NPMPkg {
-        constructor(pkgName) {
-            _NPMPkg__identifier.set(this, "");
-            // set the pkg name id to a shell and NPM safe string:
-            __classPrivateFieldSet(this, _NPMPkg__identifier, NPMPkg.argSanitize(pkgName), "f");
-        }
+        #_identifier = "";
         set name(newName) {
-            __classPrivateFieldSet(this, _NPMPkg__identifier, NPMPkg.argSanitize(newName), "f");
+            this.#_identifier = NPMPkg.argSanitize(newName);
         }
         get name() {
-            return __classPrivateFieldGet(this, _NPMPkg__identifier, "f");
+            return this.#_identifier;
         }
+        constructor(pkgName) {
+            // set the pkg name id to a shell and NPM safe string:
+            this.#_identifier = NPMPkg.argSanitize(pkgName);
+        }
+        // only use chars allowed in NPM:
+        // only allow: A-Z, a-z, 0-9, '@', '/', and '-'.
+        // this regex will match not allowed chars.
+        static unsafeNPMRegex = /[^\w@/.-]/gi;
+        // this regex will match only allowed chars.
+        static NPMPkgRegex = /^[\w@/.-]+/;
+        // this will find pkg name is NPM search results even in non-parseable mode:
+        // will even work with long and non-long mode,
+        // multi-line pkgs will need some further proessing though...
+        static NPMSearchPkgRegex = /^[\w@/.-]+(?= {2,})|^[\w@/.-]+.+(?:[\r|\n|\r\n][\w@/.-]+(?=.+\| +\|).*)+/mgi;
+        // this will split each search result into a seperate match:
+        static NPMSearchResultRegex = /(?=^[\w@/.-]+(?!.*\| +\|)(?:.*\n.+(?:\| +\|)+.*)*)/mgi;
         // this will do the post processing that NPMSearchPkgRegex needs to make a complete pkg name:
         static NPMSeachPkg() {
         }
@@ -121,24 +118,11 @@ const readline_1 = require("readline");
             return rawArg.replace(NPMPkg.unsafeNPMRegex, "");
         }
     }
-    _NPMPkg__identifier = new WeakMap();
-    // only use chars allowed in NPM:
-    // only allow: A-Z, a-z, 0-9, '@', '/', and '-'.
-    // this regex will match not allowed chars.
-    NPMPkg.unsafeNPMRegex = /[^\w@/.-]/gi;
-    // this regex will match only allowed chars.
-    NPMPkg.NPMPkgRegex = /^[\w@/.-]+/;
-    // this will find pkg name is NPM search results even in non-parseable mode:
-    // will even work with long and non-long mode,
-    // multi-line pkgs will need some further proessing though...
-    NPMPkg.NPMSearchPkgRegex = /^[\w@/.-]+(?= {2,})|^[\w@/.-]+.+(?:[\r|\n|\r\n][\w@/.-]+(?=.+\| +\|).*)+/mgi;
-    // this will split each search result into a seperate match:
-    NPMPkg.NPMSearchResultRegex = /(?=^[\w@/.-]+(?!.*\| +\|)(?:.*\n.+(?:\| +\|)+.*)*)/mgi;
     // user input interpreter for confirmation:
     class Confirmer {
+        #_defaultAnswer;
         constructor({ toYes = false, toNo = false } = { toYes: false, toNo: false }) {
-            _Confirmer__defaultAnswer.set(this, void 0);
-            __classPrivateFieldSet(this, _Confirmer__defaultAnswer, { toYes, toNo }, "f");
+            this.#_defaultAnswer = { toYes, toNo };
         }
         // use defaults to find or coerce user responce to an answer:
         interpret(responce) {
@@ -146,10 +130,10 @@ const readline_1 = require("readline");
             const answerInfo = {
                 // if default answer = "yes" is true, then answer is "yes" = true:
                 // if default answer = "yes" is false, then answer is "yes" = false:
-                isYes: __classPrivateFieldGet(this, _Confirmer__defaultAnswer, "f").toYes,
+                isYes: this.#_defaultAnswer.toYes,
                 // if default answer = "yes" is true, then default answer is "no" = false:
                 // if default answer = "yes" is false, then default answer is "no" = true:
-                isNo: __classPrivateFieldGet(this, _Confirmer__defaultAnswer, "f").toNo,
+                isNo: this.#_defaultAnswer.toNo,
                 // user responce wasn't "yes" or "no":
                 isDefault: true
             };
@@ -166,7 +150,6 @@ const readline_1 = require("readline");
             return answerInfo;
         }
     }
-    _Confirmer__defaultAnswer = new WeakMap();
     // this sanitizes an array of string args for NPM:
     const argvSanitize = (rawArgv) => {
         // create a sanitized array of the string array:
@@ -383,3 +366,4 @@ const readline_1 = require("readline");
     // called before script process exits:
     process.on('beforeExit', cleanup);
 })();
+//# sourceMappingURL=npm-backup.js.map

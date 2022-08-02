@@ -1,19 +1,9 @@
 import { BaseEncodingOptions, Dir, PathLike } from "fs"
 import { tmpdir } from "os"
-import {
-  mkdtemp,
-  mkdir,
-  readFile,
-  writeFile,
-  rename,
-  open,
-  opendir,
-  rm,
-  rmdir,
-  stat,
-  FileHandle
-} from "fs/promises"
-import { PlatformPath, posix as path } from "path"
+import { mkdtemp, mkdir, readFile, writeFile, opendir, rm/* rename, open, rmdir, stat, FileHandle */} from "fs/promises"
+import { move } from "fs-extra"
+import { /* PlatformPath, */ posix as path } from "path"
+export { chdir, cwd } from "process"
 const { basename, join } = path
 
 /**
@@ -43,13 +33,13 @@ const { basename, join } = path
 /**
  * @TODO
  */
-type NumChar = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
-type NumStr = `${NumChar}`
-type VerStr = `${NumStr}.${NumStr}.${NumStr}`
-type SemVer = `^${VerStr}` | `~${VerStr}`
-interface NPMPackageToSemVer {}
-interface NPMPackageJSON {
-  version: SemVer
+// type NumChar = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+// type NumStr = `${NumChar}`
+// type VerStr = `${NumStr}.${NumStr}.${NumStr}`
+// type SemVer = `^${VerStr}` | `~${VerStr}`
+// interface NPMPackageToSemVer {}
+export interface NPMPackageJSON {
+  version: string // SemVer
   dependencies: string[]
   devDependencies: string[]
   peerDependencies: string[]
@@ -58,61 +48,47 @@ interface NPMPackageJSON {
   bundledDependencies?: string[]
 }
 
-type FSPath = PathLike & string
-const PackageJSON: string = "package.json"
-const PackageJSONEncodingFormat: string & BufferEncoding = "utf8"
+export type FSPath = PathLike & string
+export const PackageJSON: string = "package.json"
+export const PackageJSONEncodingFormat: string & BufferEncoding = "utf8"
 
-const readPkgJSON = async (
-  containingDirPath: FSPath
-): Promise<NPMPackageJSON> => {
-  return JSON.parse(
-    await readFile(
-      join(containingDirPath as string, PackageJSON),
-      PackageJSONEncodingFormat
-    )
-  )
+// read the package.json on the pkg dir:
+export const readPkgJSON = async (containingDirPath: FSPath): Promise<NPMPackageJSON> => {
+  // create the path to the package.json:
+  const path = join(containingDirPath, PackageJSON)
+  
+  // read the package.json:
+  const file = await readFile(path, PackageJSONEncodingFormat)
+  
+  // make the JSON text file an object:
+  return JSON.parse(file)
 }
 
-const writePkgJSON = async (
-  containingDirPath: FSPath,
-  newPkgJSON: NPMPackageJSON,
-  signal?: AbortSignal
-) => {
-  return await writeFile(containingDirPath, JSON.stringify(newPkgJSON), {
+// write an object to the JSON text package.json file:
+export const writePkgJSON = async (containingDirPath: FSPath, newPkgJSON: NPMPackageJSON, signal?: AbortSignal) => {
+  // create the path to the package.json:
+  const path = join(containingDirPath, PackageJSON)
+  
+  // convert the JSON object into JSON text:
+  const file = JSON.stringify(newPkgJSON, undefined, 2)
+  
+  // write JSON text to the package.json:
+  return await writeFile(path, file, {
     encoding: PackageJSONEncodingFormat,
     signal
   } as BaseEncodingOptions)
 }
 
-const makeTmpDir = async (
-  prefix: FSPath = "tmp-install-dir-"
-): Promise<FSPath> => {
-  return await mkdtemp(join(tmpdir(), prefix))
-}
+export const makeTmpDir = async (prefix: FSPath = "tmp-install-dir-"): Promise<FSPath> => await mkdtemp(join(tmpdir(), prefix))
 
-const moveToDir = async (file: FSPath, dest: FSPath) => {
-  return await rename(file, join(dest, basename(file)))
-}
+export const moveToDir = async (file: FSPath, dest: FSPath) => await move(file, join(dest, basename(file)))
 
-const makeDir = async (dirName: FSPath): Promise<Dir> => {
+export const makeDir = async (dirName: FSPath): Promise<Dir> => {
   await mkdir(dirName, 0o755)
   return await opendir(dirName, { encoding: PackageJSONEncodingFormat })
 }
 
-const removeDir = async (dirName: FSPath) => {
-  return await rmdir(dirName, { recursive: true })
-}
+export const removeDir = async (dirName: FSPath) => await rm(dirName, { recursive: true })
 
-const removePath = async (dirName: FSPath) => {
-  return await rm(dirName, { recursive: true })
-}
+export const removePath = async (dirName: FSPath) => await rm(dirName, { recursive: true })
 
-export {
-  readPkgJSON,
-  writePkgJSON,
-  makeTmpDir,
-  moveToDir,
-  makeDir,
-  removeDir,
-  removePath
-}

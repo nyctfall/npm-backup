@@ -1,22 +1,13 @@
 "use strict";
-var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
-    if (kind === "m") throw new TypeError("Private method is not writable");
-    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
-};
-var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
-    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
-};
-var _NPMPkg__identifier;
 Object.defineProperty(exports, "__esModule", { value: true });
-// import fsPromises from "fs/promises"
-const util_1 = require("util");
-const child_process_1 = require("child_process");
-const interrogator_1 = require("./interrogator");
+exports.pkgInstallQ = exports.pkgConfirm = exports.pkgConfirmQ = exports.pkgSearch = exports.pkgSearchQ = exports.pkgTmpInit = exports.pkgPack = exports.Pkg = void 0;
+const custom_utils_1 = require("./custom-utils");
+const semver = require("semver");
+const inquirer = require("inquirer");
+const op_queue_pipeline_1 = require("./op-queue-pipeline");
+const arg_parse_utils_1 = require("./arg-parse-utils");
 const process_1 = require("process");
+const path = require("path");
 /**
   @debrief - This module has all of the NPM search, pkg installing, and other NPM commands.
 
@@ -62,223 +53,315 @@ const process_1 = require("process");
       * mv pkg backups to target dir
   *
 */
-const { log } = console;
-const execFile = (0, util_1.promisify)(child_process_1.execFile);
-// sanitized NPM pkg string object:
-class NPMPkg {
-    constructor(pkgName) {
-        _NPMPkg__identifier.set(this, "");
-        // set the pkg name id to a shell and NPM safe string:
-        __classPrivateFieldSet(this, _NPMPkg__identifier, NPMPkg.argSanitize(pkgName), "f");
-    }
+const { execFile } = custom_utils_1.utilPromise;
+// NPM package object:
+class Pkg {
+    /*
+    // only use chars allowed in NPM:
+    // only allow: A-Z, a-z, 0-9, '@', '/', '.', '_', and '-'.
+    // this regex will match not allowed chars.
+    static readonly unsafeNPMRegex: RegExp = /[^\w@/_.-]/gi
+  
+    // this regex will match only allowed chars.
+    static readonly NPMPkgRegex: RegExp = /^[\w@/_.-]+/
+  
+    
+    // this will do the post processing that NPMSearchPkgRegex needs to make a complete pkg name:
+    static NPMSeachPkg() {}
+    */
+    // this will find pkg name is NPM search results even in non-parseable mode:
+    // will even work with long and non-long mode,
+    // multi-line pkgs will need some further proessing though...
+    static NPMSearchPkgRegex = /^[\w@/.-]+(?= {2,})|^[\w@/.-]+.+(?:[\r|\n|\r\n][\w@/.-]+(?=.+\| +\|).*)+/gim;
+    // this will split each search result into a seperate match:
+    static NPMSearchResultRegex = /(?=^[\w@/.-]+(?!.*\| +\|)(?:.*\n.+(?:\| +\|)+.*)*)/gim;
+    // all valid NPM commands (excluding aliases):
+    static commands = ["access", "adduser", "audit", "bin", "bugs", "cache", "ci", "completion", "config", "dedupe", "deprecate", "diff", "dist-tag", "docs", "doctor", "edit", "exec", "explain", "explore", "find-dupes", "fund", "help", "help-search", "hook", "init", "install", "install-ci-test", "install-test", "link", "logout", "ls", "org", "outdated", "owner", "pack", "ping", "pkg", "prefix", "profile", "prune", "publish", "rebuild", "repo", "restart", "root", "run-script", "search", "set-script", "shrinkwrap", "star", "stars", "start", "stop", "team", "test", "token", "uninstall", "unpublish", "unstar", "update", "version", "view", "whoami"];
+    // this sanitizes string input to the NPM child process:
+    static argSanitize = arg_parse_utils_1.argSanitize;
+    static argvSanitize = arg_parse_utils_1.argvSanitize;
+    #_id = "";
+    #_version = "";
+    view = "";
+    path = "";
+    conf = false;
+    search = [];
     set name(newName) {
-        __classPrivateFieldSet(this, _NPMPkg__identifier, NPMPkg.argSanitize(newName), "f");
+        this.#_id = Pkg.argSanitize(newName);
     }
     get name() {
-        return __classPrivateFieldGet(this, _NPMPkg__identifier, "f");
+        return this.#_id;
     }
-    // this will do the post processing that NPMSearchPkgRegex needs to make a complete pkg name:
-    static NPMSeachPkg() { }
-    // this sanitizes an arg for NPM:
-    static argSanitize(rawArg) {
-        // just remove bad chars by replacing with empty string:
-        // return sanitized string to string arg array:
-        return rawArg.replace(NPMPkg.unsafeNPMRegex, "");
+    set version(newVer) {
+        this.#_version = semver.valid(semver.coerce(newVer)) ?? this.#_version;
     }
+    get version() {
+        return this.#_version;
+    }
+    constructor({ name }) {
+        // set the pkg name id to a shell and NPM safe string:
+        this.#_id = Pkg.argSanitize(name);
+    }
+    static async init({ location, opts, raw }) {
+        // save old working directory:
+        const currentDir = (0, process_1.cwd)();
+        // change current working directory to the npm init location:
+        (0, process_1.chdir)(location);
+        // init npm package.json in current directory:
+        const result = await this.npmCommand("init", ...opts);
+        // change back to the old working directory:
+        (0, process_1.chdir)(currentDir);
+        if (raw)
+            return result;
+        return result.stdout;
+    }
+    static async install({ pkgs, location, opts, raw }) {
+        // save old working directory:
+        const currentDir = (0, process_1.cwd)();
+        // change current working directory to the npm init location:
+        (0, process_1.chdir)(location);
+        // install npm pkgs in current directory:
+        const result = await this.npmCommand("install", ...opts, ...pkgs);
+        // change back to the old working directory:
+        (0, process_1.chdir)(currentDir);
+        if (raw)
+            return result;
+        return result.stdout;
+    }
+    static async view({ pkg, opts, raw }) {
+        const result = await this.npmCommand("view", ...opts, pkg);
+        if (raw)
+            return result;
+        return result.stdout;
+    }
+    static async search({ terms, opts, raw }) {
+        const result = await this.npmCommand("search", ...opts, ...terms);
+        if (raw)
+            return result;
+        return result.stdout;
+    }
+    static async pack({ pkgs, location, opts, cd, raw }) {
+        let result;
+        // use location as pack destination:
+        if (cd) {
+            // save old working directory:
+            const currentDir = (0, process_1.cwd)();
+            // change current working directory to the npm pack location:
+            (0, process_1.chdir)(location);
+            // pack pkgs in current directory:
+            result = await this.npmCommand("pack", ...opts, ...pkgs);
+            // change back to the old working directory:
+            (0, process_1.chdir)(currentDir);
+        }
+        else {
+            // pack pkgs in destination directory:
+            result = await this.npmCommand("pack", `--pack-destination ${location}`, ...opts, ...pkgs);
+        }
+        if (raw)
+            return result;
+        return result.stdout;
+    }
+    // reusable for npm cli:
+    static async npm(...args) {
+        // exec using sanitized string:
+        return await execFile("npm", this.argvSanitize(args));
+    }
+    // reusable for all npm commands:
+    static async npmCommand(command, ...args) {
+        // check a valid command is being used:
+        if (!this.commands.includes(command))
+            throw Error("Invalid or incompatible NPM command for NPM wrapper");
+        return await this.npm(command, ...args);
+    }
+    // command aliases:
+    static innit = this.init;
+    static create = this.init;
+    static i = this.install;
+    static in = this.install;
+    static ins = this.install;
+    static inst = this.install;
+    static insta = this.install;
+    static instal = this.install;
+    static isnt = this.install;
+    static isnta = this.install;
+    static isntal = this.install;
+    static isntall = this.install;
+    static add = this.install;
+    static v = this.view;
+    static info = this.view;
+    static show = this.view;
+    static s = this.search;
+    static se = this.search;
+    static find = this.search;
 }
-_NPMPkg__identifier = new WeakMap();
-// only use chars allowed in NPM:
-// only allow: A-Z, a-z, 0-9, '@', '/', and '-'.
-// this regex will match not allowed chars.
-NPMPkg.unsafeNPMRegex = /[^\w@/.-]/gi;
-// this regex will match only allowed chars.
-NPMPkg.NPMPkgRegex = /^[\w@/.-]+/;
-// this will find pkg name is NPM search results even in non-parseable mode:
-// will even work with long and non-long mode,
-// multi-line pkgs will need some further proessing though...
-NPMPkg.NPMSearchPkgRegex = /^[\w@/.-]+(?= {2,})|^[\w@/.-]+.+(?:[\r|\n|\r\n][\w@/.-]+(?=.+\| +\|).*)+/gim;
-// this will split each search result into a seperate match:
-NPMPkg.NPMSearchResultRegex = /(?=^[\w@/.-]+(?!.*\| +\|)(?:.*\n.+(?:\| +\|)+.*)*)/gim;
-/** @TODO - make file setup to NPM pkg installs. */
-// make tmp dir for NPM pkg install:
-/* const initNPMDir = async (): Promise<void> => {
-  
-} */
-// async generator for search results:
-const pkgConfirm = async function* ({ tableHeader, resultsList, }) {
-    // array index tracker:
+exports.Pkg = Pkg;
+// convert Commander.js OptionValues to npm CLI compatible format:
+const pkgComToOpt = (opts) => {
+    // make npm compatable string array for options:
+    // use `--option` syntax, space if just a flag, should work for options with `=value`
+    // `--option  `, or `--option value`
+    return Object.entries(opts).map(opt => {
+        // make the OptionVaule, eg `saveDev`, syntax
+        // npm compatible, eg `--save-dev`, syntax:
+        let optName = opt[0];
+        const optMatch = optName.match(/[A-Z]/g);
+        // replace in string:
+        if (optMatch) {
+            for (const match of optMatch) {
+                optName = optName.replace(match, `-${match.toLowerCase()}`);
+            }
+        }
+        // if the option doesn't have a value, use empty string:
+        const optVal = (opt[1] !== "") ? ` ${opt[1]}` : "";
+        return `--${optName}` + optVal;
+    });
+};
+// convert Pkg format to npm search compatible format:
+const pkgSearchResults = (pkg) => {
+    // use default values if they are no results:
+    const results = [
+        {
+            value: "",
+            name: `Do not install: "${pkg.name}"`
+        },
+        {
+            value: pkg.name,
+            name: `Install: "${pkg.name}"`
+        }
+    ];
+    // make sure there are results:
+    if (pkg.search.length > 0) {
+        // loop through each search result:
+        for (const res of pkg.search) {
+            // array from npm parseable output that is tab delimited:
+            const resFields = res.split("\t", 5);
+            results.push({
+                // pkg that is installed
+                value: resFields[0],
+                //  shown to user: pkg name, version, description, date published, maintainers:
+                name: `${resFields[0]}  ${resFields[4]}  ${resFields[1]}  ${resFields[3]}  ${resFields[2]}`
+            });
+        }
+    }
+    return results;
+};
+// pack npm package:
+const pkgPack = async ({ pkg, opts, location }) => {
+    return await Pkg.pack({ pkgs: [pkg.name], location, opts: pkgComToOpt(opts), cd: true });
+};
+exports.pkgPack = pkgPack;
+// make a temporary npm package to install to:
+const pkgTmpInit = async (location) => {
+    return await Pkg.init({ location, opts: ["--yes"] });
+};
+exports.pkgTmpInit = pkgTmpInit;
+// searches pkg registry to find selected pkgs:
+exports.pkgSearchQ = new op_queue_pipeline_1.OpsPipeline("Searching Registry For Packages", { useShell: true /* , useVerbose: true, useDebug: true */ })
+    .pipe(({ opts, args }) => {
+    const pkgs = [];
     let i = 0;
-    // loop though all search results:
-    for (const pkgSearchResult of resultsList) {
-        // print result:
-        log(`\n${tableHeader}\n${pkgSearchResult}`);
-        // ask user, then return promise for responce:
-        yield {
-            // returns the interpreted user responce (defaults to no):
-            answer: interrogator_1.Controverter.interpret(await promiseQuestion("Is this the right package? (y/N): ")),
-            // increments i for next loop iteration:
-            index: i++,
-        };
+    // create an array of Pkg object to the corresponding pkg to be installed:
+    for (const name of args) {
+        pkgs[i] = new Pkg({ name });
+        i++;
     }
+    return { opts, pkgs };
+}, "Creating Package List")
+    .pipe(async ({ opts, pkgs }) => {
+    // save the pkg search results data to each Pkg object:
+    for (const pkg of pkgs) {
+        // get newline separated results:
+        const foundPkgs = await Pkg.search({ opts: ["--long", "--parseable", "--color=false"], terms: [pkg.name] });
+        // split each result into an array index, and remove empty lines:
+        pkg.search = foundPkgs.split("\n").filter(res => res !== "");
+    }
+    return { opts, pkgs };
+}, "Searching For Possible Packages")
+    .pipe(async ({ opts, pkgs }) => {
+    // save the pkg info data to each Pkg object:
+    for (const pkg of pkgs) {
+        pkg.view = await Pkg.view({ pkg: pkg.name, opts: ["--color=true"] });
+    }
+    return { opts, pkgs };
+}, "Getting Info On Found Packages");
+const pkgSearch = async (...pkgNames) => {
+    return (await exports.pkgSearchQ.start(pkgNames)).pipe[0];
 };
-/** @TODO - refactor to use --parseable NPM seach option */
-// search NPM for correct pkg name:
-const searchUserPkg = async (pkg) => {
-    // records if pkg was found:
-    const userPkgInfo = {
-        correctPkg: "",
-        pkgFound: false,
-    };
-    // catch promise errors:
-    try {
-        // notify user of search:
-        log(`\nSearching NPM for package: ${pkg} ...`);
-        // catch NPM search error:
-        try {
-            // search NPM for pkg:
-            // color can't be used in search since trying to find pkg name with the TTY code codes is a regexp's nightmare...
-            const { stdout: searchResponce } = await execFile("npm", [
-                "search",
-                "--long",
-                "--color=false",
-                NPMPkg.argSanitize(pkg),
-            ]);
-            // make array of string search results to be shown to user:
-            // for compatibility with the multi-line output per pkg of NPM search --long
-            // this will make each pkg search result an index in the array after the header
-            const [tableHead, ...searchResults] = searchResponce
-                .split(NPMPkg.NPMSearchResultRegex)
-                // make sure the string doesn't have trailing newlines or whitespaces:
-                .map((str) => str.trimEnd());
-            // catch error looping through pkg search results:
-            try {
-                // ask user to find correct pkg in search:
-                for await (const { answer: pkgAns, index } of pkgConfirm({
-                    tableHeader: tableHead,
-                    resultsList: searchResults,
-                })) {
-                    // if pkg is correct, replace wrong pkg with the right pkg:
-                    if (pkgAns.isYes) {
-                        // get pkg name:
-                        // ?? '' is to prevent nullish value assignment,
-                        // empty string ("") is falsy so if statement won't run.
-                        const correctedPkg = searchResults[index].match(NPMPkg.NPMSearchPkgRegex)?.join("") ??
-                            "";
-                        log(`\n${correctedPkg} will be downloaded.`);
-                        // check regexp match to make sure it's an actual pkg name match:
-                        if (correctedPkg) {
-                            // correct wrong pkg:
-                            userPkgInfo.correctPkg = correctedPkg;
-                            // indicate pkg was found:
-                            userPkgInfo.pkgFound = true;
-                        }
-                        // stop searching results since pkg was found:
-                        break;
-                    }
-                    // if wrong pkg skip to next one:
-                    else if (pkgAns.isNo && index < searchResults.length - 1) {
-                        // if user didn't explicitly deny:
-                        if (pkgAns.isDefault) {
-                            log("\nIs it this next package...");
-                        }
-                        // if user explicitly denied:
-                        else {
-                            log("\nOh, is it this next package...");
-                        }
-                        // skip to next search result:
-                        continue;
-                    }
-                }
-            }
-            catch (e) {
-                console.error("Problem looping through search results! ...");
-                console.error(e);
-            }
-        }
-        catch (e) {
-            console.error("NPM search failed! ...");
-            console.error(e);
+exports.pkgSearch = pkgSearch;
+// confirm pkgs to be installed from registry:
+exports.pkgConfirmQ = new op_queue_pipeline_1.OpsPipeline("Confirming Packages With User" /* , { useVerbose: true, useDebug: true } */)
+    .pipe(async ({ opts, pkgs }) => {
+    // ask user if pkg is correct:
+    for (const pkg of pkgs) {
+        pkg.conf = (await inquirer.prompt({
+            type: "confirm",
+            name: "conf",
+            default: false,
+            message: `${pkg.view || pkg.name}
+Is this the correct package: "${pkg.name}"?`
+        })).conf;
+    }
+    return { opts, pkgs };
+}, "Confirming Exact Packages")
+    .pipe(async ({ opts, pkgs }) => {
+    // ask user to select correct pkg from search results:
+    for (const pkg of pkgs) {
+        // default to not installing pkg:
+        const nullPkg = `Do not install: "${pkg.name}"`;
+        // only correct unconfirmed pkgs:
+        if (!pkg.conf) {
+            pkg.name = (await inquirer.prompt({
+                type: "list",
+                name: "name",
+                message: "Select the correct package:",
+                default: nullPkg,
+                choices: pkgSearchResults(pkg)
+            })).name;
+            // empty string for pkg name will result in no pkg being installed
+            if (pkg.name !== "")
+                pkg.conf = true;
         }
     }
-    catch (e) {
-        console.error("Something went wrong when searching for package! ...");
-        console.error(e);
+    // remove deselected pkgs, reversing through array to prevent skipping indecies:
+    for (let i = pkgs.length - 1; i >= 0; i--) {
+        // remove only unconfirmed pkgs:
+        if (pkgs[i].conf === false)
+            pkgs.splice(i, 1);
     }
-    return userPkgInfo;
+    return { opts, pkgs };
+}, "Sustituting Incorrect Packages");
+const pkgConfirm = async (...pkgList) => {
+    return (await exports.pkgConfirmQ.start(pkgList)).pipe[0];
 };
-// verify pkgs user wants to get:
-const verifyUserPkgs = async function (pkg, currentIndex, thisArray) {
-    // catch any promise errors:
-    try {
-        // catch error for when pkg isn't in NPM registry:
-        try {
-            // show pkg arg to user for confirmation
-            log(`\nPackage: ${pkg}`);
-            log("-".repeat(process_1.stdout.columns / 2));
-            log((await execFile("npm", ["view", pkg])).stdout);
-        }
-        catch (e) {
-            // tell user pkg wasn't in NPM registry:
-            console.error(e);
-        }
-        // get responce: defaults to Yes
-        const answer = interrogator_1.Affirmer.interpret(await promiseQuestion("Is this the right package? (Y/n): "));
-        if (answer.isNo) {
-            debugger;
-            // ask user to find their mistyped pkg in search results:
-            const { correctPkg, pkgFound } = await searchUserPkg(pkg);
-            if (pkgFound) {
-                debugger;
-                // correct mistyped pkg name with correct pkg name:
-                thisArray[currentIndex] = correctPkg;
-            }
-            else {
-                debugger;
-                /** @TODO */
-                // ask user to retype mistyped pkg, and search for the pkg again:
-                const trySubstitutePkg = interrogator_1.Controverter.interpret(await promiseQuestion("Would you like to re-enter package name? (y/N): "));
-                // user wants to re-enter pkg name:
-                if (trySubstitutePkg.isYes) {
-                    debugger;
-                    // have user retype pkg name:
-                    const newPkg = NPMPkg.argSanitize(await promiseQuestion("Enter new package name: "));
-                    // ask user to find their retyped pkg in search results:
-                    const { correctPkg: correctNewPkg, pkgFound: NewPkgFound } = await searchUserPkg(newPkg);
-                    if (NewPkgFound) {
-                        debugger;
-                        // correct mistyped pkg name with correct pkg name:
-                        thisArray[currentIndex] = correctNewPkg;
-                    }
-                    else {
-                        debugger;
-                        // correct mistyped pkg name with correct pkg name:
-                        log("\nOh, sorry. The package can't be found,\nMoving on to the next pkg...");
-                        // leave this pkg array index:
-                        return;
-                    }
-                }
-                // user wants to go on to the next pkg, user doesn't want to re-enter pkg name:
-                else if (trySubstitutePkg.isNo) {
-                    log("\nOkay then, going on to the next package now...");
-                }
-            }
-        }
-        // if pkg is confirmed correct:
-        else if (answer.isYes) {
-            debugger;
-            // user didn't explicitly confirm pkg:
-            if (answer.isDefault) {
-                log(`\n${pkg} will be downloaded.`);
-            }
-            // user explicitly confirmed pkg:
-            else {
-                log(`\nOkay, great. ${pkg} will be downloaded.`);
-            }
-        }
-        /** @TODO async start pkg download */
+exports.pkgConfirm = pkgConfirm;
+// install pkgs:
+exports.pkgInstallQ = new op_queue_pipeline_1.OpsPipeline("Installing Packages", { useShell: true /* , useVerbose: true, useDebug: true */ })
+    .pipe(async ({ opts, pkgs, tmpDir: location }) => {
+    // make array of only the names of the pkgs:
+    const pkgNames = pkgs.map(pkg => pkg.name);
+    // make npm compatable string array for options:
+    // use `--option` syntax, space if just a flag, should work for options with `=value`
+    // `--option  `, or `--option value`
+    const npmOptions = pkgComToOpt(opts);
+    // log output from npm
+    // install using global-style to store pkg deps in each pkg's node_modules
+    // no-save will not create a package.json:
+    const res = await Pkg.install({ pkgs: pkgNames, opts: ["--global-style", "--no-save", "--color=true", ...npmOptions], location, raw: true });
+    console.error(res.stderr);
+    console.log(res.stdout);
+    return { opts, pkgs, location };
+}, "Installing")
+    .pipe(({ opts, pkgs, location }) => {
+    for (const pkg of pkgs) {
+        pkg.path = path.join(location, "node_modules", pkg.name);
     }
-    catch (e) {
-        console.error("Something went wrong! ...");
-        console.error(e);
-    }
-};
+    return { opts, pkgs };
+}, "Saving Install Location");
+/* export const pkgInstall = async ({ pkgs, opts, location }: { pkgs: Pkg[], opts: OptionValues, location: FSPath }) => {
+  return (await pkgInstallQ.start({ pkgs, opts, location })).pipe[0].pkgs
+} */
+/* (async () => {
+  const p = await pkgSearch("npm")
+  console.log(pkgSearchResults(p[0]))
+})() */ 
+//# sourceMappingURL=npm-package.js.map

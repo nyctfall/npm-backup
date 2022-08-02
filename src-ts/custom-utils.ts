@@ -90,6 +90,17 @@ const asyncForEach = async (array: Array<any>, asyncCallback: Function, thisArg?
 
 export { rl as AsyncReadline, asyncForEach }
 
+const asyncExecFile = promisify(execFileCallback)
+export { asyncExecFile as execfile }
+
 export const utilPromise = {
-  execFile: promisify(execFileCallback)
+  execFile: asyncExecFile
 }
+
+// the value returned from util.execFile():
+export type ExecFileResult = {
+  stdout: string
+  stderr: string
+}
+// the value returned from the promisified util.execFile():
+export type ExecFileAsyncResult = Promise<ExecFileResult>

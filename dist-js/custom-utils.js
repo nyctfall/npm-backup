@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.utilPromise = exports.asyncForEach = exports.AsyncReadline = void 0;
+exports.utilPromise = exports.execfile = exports.asyncForEach = exports.AsyncReadline = void 0;
 const Readline = require("readline");
 const process_1 = require("process");
 const child_process_1 = require("child_process");
@@ -73,6 +73,9 @@ const asyncForEach = async (array, asyncCallback, thisArg) => {
     }
 };
 exports.asyncForEach = asyncForEach;
+const asyncExecFile = (0, util_1.promisify)(child_process_1.execFile);
+exports.execfile = asyncExecFile;
 exports.utilPromise = {
-    execFile: (0, util_1.promisify)(child_process_1.execFile)
+    execFile: asyncExecFile
 };
+//# sourceMappingURL=custom-utils.js.map

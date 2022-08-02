@@ -97,7 +97,7 @@ type NAND_XOR_Half<T,U,RestrictOverlapKeys_WithXOR, OptProps_T extends keyof T> 
   
 
 
-type NAND_XOR<T, U, RestrictOverlapKeys_WithXOR> = NAND_XOR_Half<T,U,RestrictOverlapKeys_WithXOR, OptProps<T>> | NAND_XOR_Half<U,T,RestrictOverlapKeys_WithXOR, OptProps<U>>
+export type NAND_XOR<T, U, RestrictOverlapKeys_WithXOR> = NAND_XOR_Half<T,U,RestrictOverlapKeys_WithXOR, OptProps<T>> | NAND_XOR_Half<U,T,RestrictOverlapKeys_WithXOR, OptProps<U>>
 
 type NAND_XOR_Helper<NAND_XOR_Half_T, NAND_XOR_Half_U> = {
   [P in keyof NAND_XOR_Half_T]: NAND_XOR_Half_T[P]
@@ -107,7 +107,7 @@ type NAND_XOR_Helper<NAND_XOR_Half_T, NAND_XOR_Half_U> = {
 
 
 
-type NAND<T, U, RestrictOverlapKeys_WithXOR> = NAND_XOR_Helper<
+export type NAND<T, U, RestrictOverlapKeys_WithXOR> = NAND_XOR_Helper<
   NAND_XOR_Half< 
     T,U,RestrictOverlapKeys_WithXOR, OptProps<T>
   >, 
@@ -133,8 +133,8 @@ type NAND<T, U, RestrictOverlapKeys_WithXOR> = NAND_XOR_Helper<
 
 
 
-
-
+/** @tests  */
+/*
 type t01 = FoundOptPropsHolder<{a: "1", b?: "2", c?: "3", d: "4"}>
 type t02 = OptProps<{a: "1", b?: "2", c?: "3", d: "4"}>
 
@@ -172,6 +172,37 @@ let wer005: ads00 = { toYes:true }
 let wer006: ads00 = { toYes:false }
 let wer007: ads00 = { toNo:false }
 let wer008: ads00 = { toNo:true }
+
+
+ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

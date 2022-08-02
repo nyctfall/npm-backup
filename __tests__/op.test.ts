@@ -1,12 +1,24 @@
 import { describe, test, expect } from "@jest/globals"
-import { op } from "../src-ts/op-queue-pipeline"
+import { op, OpsPipeline } from "../src-ts/op-queue-pipeline"
 import type { Output } from "../src-ts/pipeline-types"
 import { loStdFnV, loNonStdFnV, errStdFnV } from "../src-ts/test-helper-presets"
 import { exec, execSync } from "child_process"
 import { promisify } from "util"
 const execAsync = promisify(exec)
 
+test("array compat",async () => {
+  expect((await new OpsPipeline("").pipe(() => {},"").start()).pipe).toEqual([undefined])
+  expect((await new OpsPipeline("").pipe(a => a,"").start()).pipe).toEqual([undefined])
+  expect((await new OpsPipeline("").pipe(() => [1],"").start()).pipe).toEqual([[1]])
 
+  expect((await new OpsPipeline("").pipe(() => {},"").start([1])).pipe).toEqual([undefined])
+  expect((await new OpsPipeline("").pipe(a => a,"").start([1])).pipe).toEqual([[1]])
+  expect((await new OpsPipeline("").pipe(() => [2],"").start([1])).pipe).toEqual([[2]])
+
+  expect((await new OpsPipeline("").pipe(a => [...a,2],"").start([1])).pipe).toEqual([[1,2]])
+  
+  expect((await new OpsPipeline("").pipe(a => [...a,2],"").pipe(a => [...a,3],"").start([1])).pipe).toEqual([[1,2,3]])
+})
 
 // The Op:
 describe("The async/await function wapper `Op`, a singular `Operation` in put in the wrapper function.", () => {  
@@ -17,7 +29,7 @@ describe("The async/await function wapper `Op`, a singular `Operation` in put in
         error: Error(),
         errorMsg: "",
         exitCode: 0,
-        pipe: [true]
+        pipe: [[true]]
       } as Output)
     })
     
@@ -26,7 +38,7 @@ describe("The async/await function wapper `Op`, a singular `Operation` in put in
         error: Error(),
         errorMsg: "",
         exitCode: 0,
-        pipe: [true]
+        pipe: [[true]]
       } as Output)
     })
     
@@ -35,7 +47,7 @@ describe("The async/await function wapper `Op`, a singular `Operation` in put in
         error: Error(),
         errorMsg: "",
         exitCode: 0,
-        pipe: [true]
+        pipe: [[true]]
       } as Output)
     })
     
@@ -44,7 +56,7 @@ describe("The async/await function wapper `Op`, a singular `Operation` in put in
         error: Error(),
         errorMsg: "",
         exitCode: 0,
-        pipe: [true]
+        pipe: [[true]]
       } as Output)
     })
     
@@ -241,7 +253,7 @@ describe("`Op` should return an `Output` object, \"same-y-ness\" test.", () => {
 describe("`Op` should return an `Output` object, \"loopback\" test.", () => {
   test.each(loStdFnV)("Fuzzing: %#: %p.", async (fn, argv, result) => {
     // test Op that returns the
-    const output = await op(fn, [argv])
+    const output = await op(fn, [argv], {useLoopback:true})
     
     // test exact SAME array object is returned:
     expect(output).toStrictEqual({ ...result, pipe: output.pipe })
