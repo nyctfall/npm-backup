@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# always lint any commit by default:
+npm run pre-commit
+
+# only run tests for main branch
+if [ `git rev-parse --abbrev-ref HEAD` == "main" ]; then
+  echo "main-branch-script"
+
+  npm test
+# only run tests for release branch
+elif [ `git rev-parse --abbrev-ref HEAD` == "release" ]; then
+  echo "release-branch-script"
+
+  # always test release builds
+  npm test
+fi

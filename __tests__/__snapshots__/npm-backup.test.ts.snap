@@ -1,0 +1,396 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Test NPM API stability NPM search default package registry commands: NPM \`search --color\` command. (aliases: \`s\`, \`se\`, and \`find\`) 1`] = `
+"NAME                      | DESCRIPTION          | AUTHOR          | DATE       | VERSION  | KEYWORDS                                                                                                     
+repeat-string             | Repeat the given…    | =doowb…         | 2016-10-23 | 1.6.1    | fast fastest fill left left-pad multiple pad padding repeat repeating repetition right right-pad string times
+just-left-pad             | add characters to…   | =angus-c        | 2022-12-17 | 3.2.0    | pad left left-pad string no-dependencies just
+pad                       | Left and right…      | =david          | 2019-05-20 | 3.2.0    | pad string
+@stdlib/string-base-left- | Left pad a string.   | =stdlib-bot…    | 2022-09-17 | 0.0.2    | stdlib stdstring utilities utility utils util base pad string str padding lpad left
+pad                       |                      |                 |            |          |                                                                                    
+pad-left                  | Left pad a string…   | =jonschlinkert  | 2016-05-07 | 2.1.0    | align fill left pad pad-left padded padding spaces string zero zero-fill zeros
+advanced-pad              | Left and right…      | =tylerdevs      | 2020-03-27 | 1.0.6    | padding pad padleft padright padstring truncate string align
+write-pad                 | String right pad     | =yjhuoh         | 2017-01-30 | 1.0.0    | browser left pad rightpad right string leftpad
+@goodforonefare/left-pad  | String left pad      | =goodforonefare | 2018-01-16 | 1.2.0    | leftpad left pad padding string repeat
+left-pad-mike-jenkins-tes | String left pad      | =michaeliden90  | 2017-11-18 | 1.1.0    | leftpad left pad padding string repeat
+t                         |                      |                 |            |          |                                       
+@stdlib/string-left-pad   | Left pad a string.   | =stdlib-bot…    | 2022-07-12 | 0.0.9    | stdlib stdstring utilities utility utils util pad string str padding lpad left cli
+pad-left-simple           | Pad left with some…  | =ycm.jason      | 2017-05-21 | 1.0.1    | 
+@stdlib/string-pad        | Pad a string.        | =stdlib-bot…    | 2022-07-12 | 0.0.8    | stdlib stdstring utilities utility utils util pad string str padding padstr left right center justify align lpad rpad
+halis-pad                 | Pad left, right or…  | =halis          | 2016-06-08 | 1.0.1    | pad left right both
+bereft-pad                | Parody of left-pad…  | =bendf          | 2016-10-18 | 1.0.2    | bereft-pad left-pad padding string pad
+emoji-pad                 | [![Build…            | =raksonibs      | 2016-08-29 | 1.0.0    | emojiis emojii pad left-pad right-pad
+left_pad                  | String left pad      | =cloned2k16     | 2017-03-21 | 0.0.11   | padleft leftpad left pad padding string repeat
+left-pad-nyon             | left pad for ascii…  | =syzer          | 2016-04-14 | 1.0.0    | 
+iu2fish-left-pad          | left pad numbers     | =iu2fish        | 2016-03-27 | 0.1.3    | 
+simple-pad                | Yet another left…    | =mauricebutler  | 2015-04-07 | 1.0.2    | pad lpad rpad padding number zeroes simple
+easy-pad                  | An easy way to pad…  | =jiminycricket  | 2016-10-27 | 0.0.3    | pad
+"
+`;
+
+exports[`Test NPM API stability NPM search default package registry commands: NPM \`search --color\` command. (aliases: \`s\`, \`se\`, and \`find\`) 2`] = `
+"NAME                      | DESCRIPTION          | AUTHOR          | DATE       | VERSION  | KEYWORDS                                                                                                     
+repeat-string             | Repeat the given…    | =doowb…         | 2016-10-23 | 1.6.1    | fast fastest fill left left-pad multiple pad padding repeat repeating repetition right right-pad string times
+just-left-pad             | add characters to…   | =angus-c        | 2022-12-17 | 3.2.0    | pad left left-pad string no-dependencies just
+pad                       | Left and right…      | =david          | 2019-05-20 | 3.2.0    | pad string
+@stdlib/string-base-left- | Left pad a string.   | =stdlib-bot…    | 2022-09-17 | 0.0.2    | stdlib stdstring utilities utility utils util base pad string str padding lpad left
+pad                       |                      |                 |            |          |                                                                                    
+pad-left                  | Left pad a string…   | =jonschlinkert  | 2016-05-07 | 2.1.0    | align fill left pad pad-left padded padding spaces string zero zero-fill zeros
+advanced-pad              | Left and right…      | =tylerdevs      | 2020-03-27 | 1.0.6    | padding pad padleft padright padstring truncate string align
+write-pad                 | String right pad     | =yjhuoh         | 2017-01-30 | 1.0.0    | browser left pad rightpad right string leftpad
+@goodforonefare/left-pad  | String left pad      | =goodforonefare | 2018-01-16 | 1.2.0    | leftpad left pad padding string repeat
+left-pad-mike-jenkins-tes | String left pad      | =michaeliden90  | 2017-11-18 | 1.1.0    | leftpad left pad padding string repeat
+t                         |                      |                 |            |          |                                       
+@stdlib/string-left-pad   | Left pad a string.   | =stdlib-bot…    | 2022-07-12 | 0.0.9    | stdlib stdstring utilities utility utils util pad string str padding lpad left cli
+pad-left-simple           | Pad left with some…  | =ycm.jason      | 2017-05-21 | 1.0.1    | 
+@stdlib/string-pad        | Pad a string.        | =stdlib-bot…    | 2022-07-12 | 0.0.8    | stdlib stdstring utilities utility utils util pad string str padding padstr left right center justify align lpad rpad
+halis-pad                 | Pad left, right or…  | =halis          | 2016-06-08 | 1.0.1    | pad left right both
+bereft-pad                | Parody of left-pad…  | =bendf          | 2016-10-18 | 1.0.2    | bereft-pad left-pad padding string pad
+emoji-pad                 | [![Build…            | =raksonibs      | 2016-08-29 | 1.0.0    | emojiis emojii pad left-pad right-pad
+left_pad                  | String left pad      | =cloned2k16     | 2017-03-21 | 0.0.11   | padleft leftpad left pad padding string repeat
+left-pad-nyon             | left pad for ascii…  | =syzer          | 2016-04-14 | 1.0.0    | 
+iu2fish-left-pad          | left pad numbers     | =iu2fish        | 2016-03-27 | 0.1.3    | 
+simple-pad                | Yet another left…    | =mauricebutler  | 2015-04-07 | 1.0.2    | pad lpad rpad padding number zeroes simple
+easy-pad                  | An easy way to pad…  | =jiminycricket  | 2016-10-27 | 0.0.3    | pad
+"
+`;
+
+exports[`Test NPM API stability NPM search default package registry commands: NPM \`search --color\` command. (aliases: \`s\`, \`se\`, and \`find\`) 3`] = `
+"NAME                      | DESCRIPTION          | AUTHOR          | DATE       | VERSION  | KEYWORDS                                                                                                     
+repeat-string             | Repeat the given…    | =doowb…         | 2016-10-23 | 1.6.1    | fast fastest fill left [31mleft-pad[0m multiple pad padding repeat repeating repetition right right-pad string times[31m[0m
+just-[31mleft-pad[0m             | add characters to…   | =angus-c        | 2022-12-17 | 3.2.0    | pad left [31mleft-pad[0m string no-dependencies just[31m[0m
+pad                       | Left and right…      | =david          | 2019-05-20 | 3.2.0    | pad string[31m[0m
+@stdlib/string-base-left- | Left pad a string.   | =stdlib-bot…    | 2022-09-17 | 0.0.2    | stdlib stdstring utilities utility utils util base pad string str padding lpad left
+pad                       |                      |                 |            |          |                                                                                    [31m[0m
+pad-left                  | Left pad a string…   | =jonschlinkert  | 2016-05-07 | 2.1.0    | align fill left pad pad-left padded padding spaces string zero zero-fill zeros[31m[0m
+advanced-pad              | Left and right…      | =tylerdevs      | 2020-03-27 | 1.0.6    | padding pad padleft padright padstring truncate string align[31m[0m
+write-pad                 | String right pad     | =yjhuoh         | 2017-01-30 | 1.0.0    | browser left pad rightpad right string leftpad[31m[0m
+@goodforonefare/[31mleft-pad[0m  | String left pad      | =goodforonefare | 2018-01-16 | 1.2.0    | leftpad left pad padding string repeat[31m[0m
+[31mleft-pad[0m-mike-jenkins-tes | String left pad      | =michaeliden90  | 2017-11-18 | 1.1.0    | leftpad left pad padding string repeat
+t                         |                      |                 |            |          |                                       [31m[0m
+@stdlib/string-[31mleft-pad[0m   | Left pad a string.   | =stdlib-bot…    | 2022-07-12 | 0.0.9    | stdlib stdstring utilities utility utils util pad string str padding lpad left cli[31m[0m
+pad-left-simple           | Pad left with some…  | =ycm.jason      | 2017-05-21 | 1.0.1    | [31m[0m
+@stdlib/string-pad        | Pad a string.        | =stdlib-bot…    | 2022-07-12 | 0.0.8    | stdlib stdstring utilities utility utils util pad string str padding padstr left right center justify align lpad rpad[31m[0m
+halis-pad                 | Pad left, right or…  | =halis          | 2016-06-08 | 1.0.1    | pad left right both[31m[0m
+bereft-pad                | Parody of [31mleft-pad[0m…  | =bendf          | 2016-10-18 | 1.0.2    | bereft-pad [31mleft-pad[0m padding string pad[31m[0m
+emoji-pad                 | [![Build…            | =raksonibs      | 2016-08-29 | 1.0.0    | emojiis emojii pad [31mleft-pad[0m right-pad[31m[0m
+left_pad                  | String left pad      | =cloned2k16     | 2017-03-21 | 0.0.11   | padleft leftpad left pad padding string repeat[31m[0m
+[31mleft-pad[0m-nyon             | left pad for ascii…  | =syzer          | 2016-04-14 | 1.0.0    | [31m[0m
+iu2fish-[31mleft-pad[0m          | left pad numbers     | =iu2fish        | 2016-03-27 | 0.1.3    | [31m[0m
+simple-pad                | Yet another left…    | =mauricebutler  | 2015-04-07 | 1.0.2    | pad lpad rpad padding number zeroes simple[31m[0m
+easy-pad                  | An easy way to pad…  | =jiminycricket  | 2016-10-27 | 0.0.3    | pad[31m[0m
+"
+`;
+
+exports[`Test NPM API stability NPM search default package registry commands: NPM \`search --json\` command. (aliases: \`s\`, \`se\`, and \`find\`) 1`] = `
+"[
+
+{"name":"repeat-string","scope":"unscoped","version":"1.6.1","description":"Repeat the given string n times. Fastest implementation for repeating a string.","keywords":["fast","fastest","fill","left","left-pad","multiple","pad","padding","repeat","repeating","repetition","right","right-pad","string","times"],"date":"2016-10-23T16:54:00.613Z","links":{"npm":"https://www.npmjs.com/package/repeat-string","homepage":"https://github.com/jonschlinkert/repeat-string","repository":"https://github.com/jonschlinkert/repeat-string","bugs":"https://github.com/jonschlinkert/repeat-string/issues"},"author":{"name":"Jon Schlinkert","url":"http://github.com/jonschlinkert"},"publisher":{"username":"jonschlinkert","email":"github@sellside.com"},"maintainers":[{"username":"doowb","email":"brian.woodward@gmail.com"},{"username":"jonschlinkert","email":"github@sellside.com"}]}
+
+,
+
+{"name":"just-left-pad","scope":"unscoped","version":"3.2.0","description":"add characters to the left of a string such that its total length is n","keywords":["pad","left","left-pad","string","no-dependencies","just"],"date":"2022-12-17T21:03:00.242Z","links":{"npm":"https://www.npmjs.com/package/just-left-pad","homepage":"https://github.com/angus-c/just#readme","repository":"https://github.com/angus-c/just","bugs":"https://github.com/angus-c/just/issues"},"author":{"name":"Angus Croll"},"publisher":{"username":"angus-c","email":"anguscroll@gmail.com"},"maintainers":[{"username":"angus-c","email":"anguscroll@gmail.com"}]}
+
+,
+
+{"name":"pad","scope":"unscoped","version":"3.2.0","description":"Left and right string padding","keywords":["pad","string"],"date":"2019-05-20T12:36:01.392Z","links":{"npm":"https://www.npmjs.com/package/pad","homepage":"https://github.com/adaltas/node-pad","repository":"https://github.com/adaltas/node-pad","bugs":"https://github.com/adaltas/node-pad/issues"},"author":{"name":"David Worms","email":"david@adaltas.com","username":"david"},"publisher":{"username":"david","email":"david@adaltas.com"},"maintainers":[{"username":"david","email":"david@adaltas.com"}]}
+
+,
+
+{"name":"@stdlib/string-base-left-pad","scope":"stdlib","version":"0.0.2","description":"Left pad a string.","keywords":["stdlib","stdstring","utilities","utility","utils","util","base","pad","string","str","padding","lpad","left"],"date":"2022-09-17T20:39:07.529Z","links":{"npm":"https://www.npmjs.com/package/%40stdlib%2Fstring-base-left-pad","homepage":"https://stdlib.io","repository":"https://github.com/stdlib-js/string-base-left-pad","bugs":"https://github.com/stdlib-js/stdlib/issues"},"author":{"name":"The Stdlib Authors","url":"https://github.com/stdlib-js/stdlib/graphs/contributors"},"publisher":{"username":"kgryte","email":"kgryte@gmail.com"},"maintainers":[{"username":"stdlib-bot","email":"kgryte@gmail.com"},{"username":"kgryte","email":"kgryte@gmail.com"},{"username":"planeshifter","email":"pgb@andrew.cmu.edu"},{"username":"rreusser","email":"rsreusser@gmail.com"}]}
+
+,
+
+{"name":"pad-left","scope":"unscoped","version":"2.1.0","description":"Left pad a string with zeros or a specified string. Fastest implementation.","keywords":["align","fill","left","pad","pad-left","padded","padding","spaces","string","zero","zero-fill","zeros"],"date":"2016-05-07T10:18:51.750Z","links":{"npm":"https://www.npmjs.com/package/pad-left","homepage":"https://github.com/jonschlinkert/pad-left","repository":"https://github.com/jonschlinkert/pad-left","bugs":"https://github.com/jonschlinkert/pad-left/issues"},"author":{"name":"Jon Schlinkert","url":"https://github.com/jonschlinkert"},"publisher":{"username":"jonschlinkert","email":"github@sellside.com"},"maintainers":[{"username":"jonschlinkert","email":"github@sellside.com"}]}
+
+,
+
+{"name":"advanced-pad","scope":"unscoped","version":"1.0.6","description":"Left and right string padding with advanced features.","keywords":["padding","pad","padleft","padright","padstring","truncate","string","align"],"date":"2020-03-27T21:38:39.309Z","links":{"npm":"https://www.npmjs.com/package/advanced-pad","homepage":"https://github.com/tylerdevs/advanced-pad#readme","repository":"https://github.com/tylerdevs/advanced-pad","bugs":"https://github.com/tylerdevs/advanced-pad/issues"},"author":{"name":"Tyler Colwell","email":"tylerqc@gmail.com","username":"tylerdevs"},"publisher":{"username":"tylerdevs","email":"tylerqc@gmail.com"},"maintainers":[{"username":"tylerdevs","email":"tylerqc@gmail.com"}]}
+
+,
+
+{"name":"write-pad","scope":"unscoped","version":"1.0.0","description":"String right pad","keywords":["browser","left","pad","rightpad","right","string","leftpad"],"date":"2017-01-30T07:57:25.694Z","links":{"npm":"https://www.npmjs.com/package/write-pad","homepage":"https://github.com/yjhuoh/right-pad","repository":"https://github.com/yjhuoh/right-pad","bugs":"https://github.com/yjhuoh/right-pad/issues"},"author":{"name":"Yu-Jay Huoh","email":"yjhuoh@gmail.com","url":"http://github.com/yjhuoh"},"publisher":{"username":"yjhuoh","email":"yujay@meetearnest.com"},"maintainers":[{"username":"yjhuoh","email":"yujay@meetearnest.com"}]}
+
+,
+
+{"name":"@goodforonefare/left-pad","scope":"goodforonefare","version":"1.2.0","description":"String left pad","keywords":["leftpad","left","pad","padding","string","repeat"],"date":"2018-01-16T05:28:17.452Z","links":{"npm":"https://www.npmjs.com/package/%40goodforonefare%2Fleft-pad","homepage":"https://github.com/stevemao/left-pad#readme","repository":"https://github.com/stevemao/left-pad","bugs":"https://github.com/stevemao/left-pad/issues"},"author":{"name":"azer"},"publisher":{"username":"goodforonefare","email":"goodforonefare@gmail.com"},"maintainers":[{"username":"goodforonefare","email":"goodforonefare@gmail.com"}]}
+
+,
+
+{"name":"left-pad-mike-jenkins-test","scope":"unscoped","version":"1.1.0","description":"String left pad","keywords":["leftpad","left","pad","padding","string","repeat"],"date":"2017-11-18T00:26:40.994Z","links":{"npm":"https://www.npmjs.com/package/left-pad-mike-jenkins-test","homepage":"https://github.com/michael-iden/left-pad#readme","repository":"https://github.com/michael-iden/left-pad","bugs":"https://github.com/michael-iden/left-pad/issues"},"author":{"name":"azer"},"publisher":{"username":"michaeliden90","email":"mike.iden@ithaka.org"},"maintainers":[{"username":"michaeliden90","email":"mike.iden@ithaka.org"}]}
+
+,
+
+{"name":"@stdlib/string-left-pad","scope":"stdlib","version":"0.0.9","description":"Left pad a string.","keywords":["stdlib","stdstring","utilities","utility","utils","util","pad","string","str","padding","lpad","left","cli"],"date":"2022-07-12T14:21:18.010Z","links":{"npm":"https://www.npmjs.com/package/%40stdlib%2Fstring-left-pad","homepage":"https://stdlib.io","repository":"https://github.com/stdlib-js/string-left-pad","bugs":"https://github.com/stdlib-js/stdlib/issues"},"author":{"name":"The Stdlib Authors","url":"https://github.com/stdlib-js/stdlib/graphs/contributors"},"publisher":{"username":"kgryte","email":"kgryte@gmail.com"},"maintainers":[{"username":"stdlib-bot","email":"kgryte@gmail.com"},{"username":"kgryte","email":"kgryte@gmail.com"},{"username":"planeshifter","email":"pgb@andrew.cmu.edu"},{"username":"rreusser","email":"rsreusser@gmail.com"}]}
+
+,
+
+{"name":"pad-left-simple","scope":"unscoped","version":"1.0.1","description":"Pad left with some chars given a fixed length.","date":"2017-05-21T14:50:24.434Z","links":{"npm":"https://www.npmjs.com/package/pad-left-simple","homepage":"https://github.com/ycmjason/pad-left-simple#readme","repository":"https://github.com/ycmjason/pad-left-simple","bugs":"https://github.com/ycmjason/pad-left-simple/issues"},"author":{"name":"Jason Yu"},"publisher":{"username":"ycm.jason","email":"me@ycmjason.com"},"maintainers":[{"username":"ycm.jason","email":"me@ycmjason.com"}]}
+
+,
+
+{"name":"@stdlib/string-pad","scope":"stdlib","version":"0.0.8","description":"Pad a string.","keywords":["stdlib","stdstring","utilities","utility","utils","util","pad","string","str","padding","padstr","left","right","center","justify","align","lpad","rpad"],"date":"2022-07-12T14:24:19.120Z","links":{"npm":"https://www.npmjs.com/package/%40stdlib%2Fstring-pad","homepage":"https://stdlib.io","repository":"https://github.com/stdlib-js/string-pad","bugs":"https://github.com/stdlib-js/stdlib/issues"},"author":{"name":"The Stdlib Authors","url":"https://github.com/stdlib-js/stdlib/graphs/contributors"},"publisher":{"username":"kgryte","email":"kgryte@gmail.com"},"maintainers":[{"username":"stdlib-bot","email":"kgryte@gmail.com"},{"username":"kgryte","email":"kgryte@gmail.com"},{"username":"planeshifter","email":"pgb@andrew.cmu.edu"},{"username":"rreusser","email":"rsreusser@gmail.com"}]}
+
+,
+
+{"name":"halis-pad","scope":"unscoped","version":"1.0.1","description":"Pad left, right or both (to your heart's content)","keywords":["pad","left","right","both"],"date":"2016-06-08T06:15:39.520Z","links":{"npm":"https://www.npmjs.com/package/halis-pad","homepage":"https://github.com/halis/halis-pad#readme","repository":"https://github.com/halis/halis-pad","bugs":"https://github.com/halis/halis-pad/issues"},"author":{"name":"Chris Grimes","url":"http://halistechnology.com"},"publisher":{"username":"halis","email":"cjg1981@live.com"},"maintainers":[{"username":"halis","email":"cjg1981@live.com"}]}
+
+,
+
+{"name":"bereft-pad","scope":"unscoped","version":"1.0.2","description":"Parody of left-pad package which only pads with \\\\u26B0 (coffin) symbol.","keywords":["bereft-pad","left-pad","padding","string","pad"],"date":"2016-10-18T15:32:36.852Z","links":{"npm":"https://www.npmjs.com/package/bereft-pad"},"author":{"name":"Benjamin Dudiak-Fry"},"publisher":{"username":"bendf","email":"bdudiakfry@gmail.com"},"maintainers":[{"username":"bendf","email":"bdudiakfry@gmail.com"}]}
+
+,
+
+{"name":"emoji-pad","scope":"unscoped","version":"1.0.0","description":"[![Build Status](https://travis-ci.org/raksonibs/emoji-pad.svg?branch=master)](https://travis-ci.org/raksonibs/emoji-pad)","keywords":["emojiis","emojii","pad","left-pad","right-pad"],"date":"2016-08-29T04:46:59.757Z","links":{"npm":"https://www.npmjs.com/package/emoji-pad"},"author":{"name":"Oskar Niburski","email":"oskarniburski@gmail.com","url":"http://raksonibs.github.io","username":"raksonibs"},"publisher":{"username":"raksonibs","email":"oskarniburski@gmail.com"},"maintainers":[{"username":"raksonibs","email":"oskarniburski@gmail.com"}]}
+
+,
+
+{"name":"left_pad","scope":"unscoped","version":"0.0.11","description":"String left pad","keywords":["padleft","leftpad","left","pad","padding","string","repeat"],"date":"2017-03-21T17:56:51.945Z","links":{"npm":"https://www.npmjs.com/package/left_pad","homepage":"https://github.com/cloned2k16/_padLeft#readme","repository":"https://github.com/cloned2k16/_padLeft","bugs":"https://github.com/cloned2k16/_padLeft/issues"},"author":{"name":"Paolo Lioy"},"publisher":{"username":"cloned2k16","email":"paolo@yaoo.net"},"maintainers":[{"username":"cloned2k16","email":"paolo@yaoo.net"}]}
+
+,
+
+{"name":"left-pad-nyon","scope":"unscoped","version":"1.0.0","description":"left pad for ascii lovers","date":"2016-04-14T21:40:56.274Z","links":{"npm":"https://www.npmjs.com/package/left-pad-nyon"},"author":{"name":"syzer"},"publisher":{"username":"syzer","email":"syzer3@gmail.com"},"maintainers":[{"username":"syzer","email":"syzer3@gmail.com"}]}
+
+,
+
+{"name":"iu2fish-left-pad","scope":"unscoped","version":"0.1.3","description":"left pad numbers","date":"2016-03-27T11:51:02.408Z","links":{"npm":"https://www.npmjs.com/package/iu2fish-left-pad","homepage":"https://github.com/iu2fish/left-pad","repository":"https://github.com/iu2fish/left-pad","bugs":"https://github.com/iu2fish/left-pad/issues"},"author":{"name":"iu2fish"},"publisher":{"username":"iu2fish","email":"wfenng@gmail.com"},"maintainers":[{"username":"iu2fish","email":"wfenng@gmail.com"}]}
+
+,
+
+{"name":"simple-pad","scope":"unscoped","version":"1.0.2","description":"Yet another left and right padding module","keywords":["pad","lpad","rpad","padding","number","zeroes","simple"],"date":"2015-04-07T03:56:09.221Z","links":{"npm":"https://www.npmjs.com/package/simple-pad","homepage":"https://github.com/MauriceButler/simple-pad","repository":"https://github.com/MauriceButler/simple-pad","bugs":"https://github.com/MauriceButler/simple-pad/issues"},"author":{"name":"Maurice Butler","email":"maurice.butler@gmail.com","username":"mauricebutler"},"publisher":{"username":"mauricebutler","email":"maurice.butler@gmail.com"},"maintainers":[{"username":"mauricebutler","email":"maurice.butler@gmail.com"}]}
+
+,
+
+{"name":"easy-pad","scope":"unscoped","version":"0.0.3","description":"An easy way to pad string left side or right side.","keywords":["pad"],"date":"2016-10-27T14:09:47.734Z","links":{"npm":"https://www.npmjs.com/package/easy-pad","homepage":"https://github.com/jiminycricket/easy-pad#readme","repository":"https://github.com/jiminycricket/easy-pad","bugs":"https://github.com/jiminycricket/easy-pad/issues"},"author":{"name":"Jiminy Cricket"},"publisher":{"username":"jiminycricket","email":"jiminy.upon.star@gmail.com"},"maintainers":[{"username":"jiminycricket","email":"jiminy.upon.star@gmail.com"}]}
+]
+
+"
+`;
+
+exports[`Test NPM API stability NPM search default package registry commands: NPM \`search --long\` command. (aliases: \`s\`, \`se\`, and \`find\`) 1`] = `
+"NAME                      | DESCRIPTION          | AUTHOR          | DATE       | VERSION  | KEYWORDS                                                                                                     
+repeat-string             | Repeat the given…    | =doowb…         | 2016-10-23 | 1.6.1    | fast fastest fill left left-pad multiple pad padding repeat repeating repetition right right-pad string times
+just-left-pad             | add characters to…   | =angus-c        | 2022-12-17 | 3.2.0    | pad left left-pad string no-dependencies just
+pad                       | Left and right…      | =david          | 2019-05-20 | 3.2.0    | pad string
+@stdlib/string-base-left- | Left pad a string.   | =stdlib-bot…    | 2022-09-17 | 0.0.2    | stdlib stdstring utilities utility utils util base pad string str padding lpad left
+pad                       |                      |                 |            |          |                                                                                    
+pad-left                  | Left pad a string…   | =jonschlinkert  | 2016-05-07 | 2.1.0    | align fill left pad pad-left padded padding spaces string zero zero-fill zeros
+advanced-pad              | Left and right…      | =tylerdevs      | 2020-03-27 | 1.0.6    | padding pad padleft padright padstring truncate string align
+write-pad                 | String right pad     | =yjhuoh         | 2017-01-30 | 1.0.0    | browser left pad rightpad right string leftpad
+@goodforonefare/left-pad  | String left pad      | =goodforonefare | 2018-01-16 | 1.2.0    | leftpad left pad padding string repeat
+left-pad-mike-jenkins-tes | String left pad      | =michaeliden90  | 2017-11-18 | 1.1.0    | leftpad left pad padding string repeat
+t                         |                      |                 |            |          |                                       
+@stdlib/string-left-pad   | Left pad a string.   | =stdlib-bot…    | 2022-07-12 | 0.0.9    | stdlib stdstring utilities utility utils util pad string str padding lpad left cli
+pad-left-simple           | Pad left with some…  | =ycm.jason      | 2017-05-21 | 1.0.1    | 
+@stdlib/string-pad        | Pad a string.        | =stdlib-bot…    | 2022-07-12 | 0.0.8    | stdlib stdstring utilities utility utils util pad string str padding padstr left right center justify align lpad rpad
+halis-pad                 | Pad left, right or…  | =halis          | 2016-06-08 | 1.0.1    | pad left right both
+bereft-pad                | Parody of left-pad…  | =bendf          | 2016-10-18 | 1.0.2    | bereft-pad left-pad padding string pad
+emoji-pad                 | [![Build…            | =raksonibs      | 2016-08-29 | 1.0.0    | emojiis emojii pad left-pad right-pad
+left_pad                  | String left pad      | =cloned2k16     | 2017-03-21 | 0.0.11   | padleft leftpad left pad padding string repeat
+left-pad-nyon             | left pad for ascii…  | =syzer          | 2016-04-14 | 1.0.0    | 
+iu2fish-left-pad          | left pad numbers     | =iu2fish        | 2016-03-27 | 0.1.3    | 
+simple-pad                | Yet another left…    | =mauricebutler  | 2015-04-07 | 1.0.2    | pad lpad rpad padding number zeroes simple
+easy-pad                  | An easy way to pad…  | =jiminycricket  | 2016-10-27 | 0.0.3    | pad
+"
+`;
+
+exports[`Test NPM API stability NPM search default package registry commands: NPM \`search --parseable\` command. (aliases: \`s\`, \`se\`, and \`find\`) 1`] = `
+"repeat-string	Repeat the given string n times. Fastest implementation for repeating a string.	=doowb =jonschlinkert	2016-10-23 	1.6.1	fast fastest fill left left-pad multiple pad padding repeat repeating repetition right right-pad string times
+just-left-pad	add characters to the left of a string such that its total length is n	=angus-c	2022-12-17 	3.2.0	pad left left-pad string no-dependencies just
+pad	Left and right string padding	=david	2019-05-20 	3.2.0	pad string
+@stdlib/string-base-left-pad	Left pad a string.	=stdlib-bot =kgryte =planeshifter =rreusser	2022-09-17 	0.0.2	stdlib stdstring utilities utility utils util base pad string str padding lpad left
+pad-left	Left pad a string with zeros or a specified string. Fastest implementation.	=jonschlinkert	2016-05-07 	2.1.0	align fill left pad pad-left padded padding spaces string zero zero-fill zeros
+advanced-pad	Left and right string padding with advanced features.	=tylerdevs	2020-03-27 	1.0.6	padding pad padleft padright padstring truncate string align
+write-pad	String right pad	=yjhuoh	2017-01-30 	1.0.0	browser left pad rightpad right string leftpad
+@goodforonefare/left-pad	String left pad	=goodforonefare	2018-01-16 	1.2.0	leftpad left pad padding string repeat
+left-pad-mike-jenkins-test	String left pad	=michaeliden90	2017-11-18 	1.1.0	leftpad left pad padding string repeat
+@stdlib/string-left-pad	Left pad a string.	=stdlib-bot =kgryte =planeshifter =rreusser	2022-07-12 	0.0.9	stdlib stdstring utilities utility utils util pad string str padding lpad left cli
+pad-left-simple	Pad left with some chars given a fixed length.	=ycm.jason	2017-05-21 	1.0.1	
+@stdlib/string-pad	Pad a string.	=stdlib-bot =kgryte =planeshifter =rreusser	2022-07-12 	0.0.8	stdlib stdstring utilities utility utils util pad string str padding padstr left right center justify align lpad rpad
+halis-pad	Pad left, right or both (to your heart's content)	=halis	2016-06-08 	1.0.1	pad left right both
+bereft-pad	Parody of left-pad package which only pads with \\u26B0 (coffin) symbol.	=bendf	2016-10-18 	1.0.2	bereft-pad left-pad padding string pad
+emoji-pad	[![Build Status](https://travis-ci.org/raksonibs/emoji-pad.svg?branch=master)](https://travis-ci.org/raksonibs/emoji-pad)	=raksonibs	2016-08-29 	1.0.0	emojiis emojii pad left-pad right-pad
+left_pad	String left pad	=cloned2k16	2017-03-21 	0.0.11	padleft leftpad left pad padding string repeat
+left-pad-nyon	left pad for ascii lovers	=syzer	2016-04-14 	1.0.0	
+iu2fish-left-pad	left pad numbers	=iu2fish	2016-03-27 	0.1.3	
+simple-pad	Yet another left and right padding module	=mauricebutler	2015-04-07 	1.0.2	pad lpad rpad padding number zeroes simple
+easy-pad	An easy way to pad string left side or right side.	=jiminycricket	2016-10-27 	0.0.3	pad
+"
+`;
+
+exports[`Test NPM API stability NPM search default package registry commands: NPM \`search\` command. (aliases: \`s\`, \`se\`, and \`find\`) 1`] = `
+"NAME                      | DESCRIPTION          | AUTHOR          | DATE       | VERSION  | KEYWORDS                                                                                                     
+repeat-string             | Repeat the given…    | =doowb…         | 2016-10-23 | 1.6.1    | fast fastest fill left left-pad multiple pad padding repeat repeating repetition right right-pad string times
+just-left-pad             | add characters to…   | =angus-c        | 2022-12-17 | 3.2.0    | pad left left-pad string no-dependencies just
+pad                       | Left and right…      | =david          | 2019-05-20 | 3.2.0    | pad string
+@stdlib/string-base-left- | Left pad a string.   | =stdlib-bot…    | 2022-09-17 | 0.0.2    | stdlib stdstring utilities utility utils util base pad string str padding lpad left
+pad                       |                      |                 |            |          |                                                                                    
+pad-left                  | Left pad a string…   | =jonschlinkert  | 2016-05-07 | 2.1.0    | align fill left pad pad-left padded padding spaces string zero zero-fill zeros
+advanced-pad              | Left and right…      | =tylerdevs      | 2020-03-27 | 1.0.6    | padding pad padleft padright padstring truncate string align
+write-pad                 | String right pad     | =yjhuoh         | 2017-01-30 | 1.0.0    | browser left pad rightpad right string leftpad
+@goodforonefare/left-pad  | String left pad      | =goodforonefare | 2018-01-16 | 1.2.0    | leftpad left pad padding string repeat
+left-pad-mike-jenkins-tes | String left pad      | =michaeliden90  | 2017-11-18 | 1.1.0    | leftpad left pad padding string repeat
+t                         |                      |                 |            |          |                                       
+@stdlib/string-left-pad   | Left pad a string.   | =stdlib-bot…    | 2022-07-12 | 0.0.9    | stdlib stdstring utilities utility utils util pad string str padding lpad left cli
+pad-left-simple           | Pad left with some…  | =ycm.jason      | 2017-05-21 | 1.0.1    | 
+@stdlib/string-pad        | Pad a string.        | =stdlib-bot…    | 2022-07-12 | 0.0.8    | stdlib stdstring utilities utility utils util pad string str padding padstr left right center justify align lpad rpad
+halis-pad                 | Pad left, right or…  | =halis          | 2016-06-08 | 1.0.1    | pad left right both
+bereft-pad                | Parody of left-pad…  | =bendf          | 2016-10-18 | 1.0.2    | bereft-pad left-pad padding string pad
+emoji-pad                 | [![Build…            | =raksonibs      | 2016-08-29 | 1.0.0    | emojiis emojii pad left-pad right-pad
+left_pad                  | String left pad      | =cloned2k16     | 2017-03-21 | 0.0.11   | padleft leftpad left pad padding string repeat
+left-pad-nyon             | left pad for ascii…  | =syzer          | 2016-04-14 | 1.0.0    | 
+iu2fish-left-pad          | left pad numbers     | =iu2fish        | 2016-03-27 | 0.1.3    | 
+simple-pad                | Yet another left…    | =mauricebutler  | 2015-04-07 | 1.0.2    | pad lpad rpad padding number zeroes simple
+easy-pad                  | An easy way to pad…  | =jiminycricket  | 2016-10-27 | 0.0.3    | pad
+"
+`;
+
+exports[`Test NPM API stability NPM show package info commands: NPM \`view --json\` command. (aliases: \`v\`, \`show\`, and \`info\`) 1`] = `
+"{
+  "_id": "left-pad@1.3.0",
+  "_rev": "46-bde335d73907b09f1294adab680fbe74",
+  "name": "left-pad",
+  "time": {
+    "modified": "2022-06-19T11:26:55.056Z",
+    "created": "2014-03-14T09:09:20.762Z",
+    "0.0.0": "2014-03-14T09:09:20.762Z",
+    "0.0.1": "2014-08-14T03:31:03.146Z",
+    "0.0.2": "2014-08-15T07:13:09.056Z",
+    "0.0.3": "2016-03-22T21:51:19.774Z",
+    "0.0.4": "2015-05-20T04:04:04.473Z",
+    "1.0.0": "2016-03-22T21:42:18.002Z",
+    "0.0.9": "2016-03-22T21:51:19.774Z",
+    "1.0.1": "2016-03-23T00:00:19.758Z",
+    "1.0.2": "2016-04-13T16:59:21.924Z",
+    "1.1.0": "2016-05-01T11:06:11.595Z",
+    "1.1.1": "2016-07-08T11:25:40.531Z",
+    "1.1.2": "2016-09-24T10:25:01.998Z",
+    "1.1.3": "2016-10-01T08:01:07.703Z",
+    "1.2.0": "2017-11-17T05:48:38.934Z",
+    "1.3.0": "2018-04-09T01:10:45.796Z"
+  },
+  "maintainers": [
+    "sebmck <sebmck@gmail.com>",
+    "stevemao <maochenyan@gmail.com>",
+    "westlac <cameron.westland@autodesk.com>"
+  ],
+  "dist-tags": {
+    "latest": "1.3.0"
+  },
+  "description": "String left pad",
+  "versions": [
+    "0.0.0",
+    "0.0.1",
+    "0.0.2",
+    "0.0.3",
+    "0.0.4",
+    "0.0.9",
+    "1.0.0",
+    "1.0.1",
+    "1.0.2",
+    "1.1.0",
+    "1.1.1",
+    "1.1.2",
+    "1.1.3",
+    "1.2.0",
+    "1.3.0"
+  ],
+  "homepage": "https://github.com/stevemao/left-pad#readme",
+  "keywords": [
+    "leftpad",
+    "left",
+    "pad",
+    "padding",
+    "string",
+    "repeat"
+  ],
+  "repository": {
+    "url": "git+ssh://git@github.com/stevemao/left-pad.git",
+    "type": "git"
+  },
+  "author": "azer",
+  "bugs": {
+    "url": "https://github.com/stevemao/left-pad/issues"
+  },
+  "license": "WTFPL",
+  "readmeFilename": "README.md",
+  "users": {
+    "hustliu": true,
+    "chriskwan": true,
+    "vigo": true,
+    "bishbashbosh": true,
+    "piecioshka": true,
+    "alexyan": true,
+    "krishaamer": true,
+    "iusfof": true,
+    "tooyond": true,
+    "sharper": true,
+    "ubitso4": true
+  },
+  "_contentLength": 22618,
+  "version": "1.3.0",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "test": "node test",
+    "bench": "node perf/perf.js"
+  },
+  "devDependencies": {
+    "benchmark": "^2.1.0",
+    "fast-check": "0.0.8",
+    "tape": "*"
+  },
+  "gitHead": "ff8e7ba8b4122829cf66125ca8445cac7f073bce",
+  "_npmVersion": "5.5.1",
+  "_nodeVersion": "9.2.1",
+  "_npmUser": "stevemao <maochenyan@gmail.com>",
+  "dist": {
+    "integrity": "sha512-XI5MPzVNApjAyhQzphX8BkmKsKUxD4LdyK24iZeQGinBN9yTQT3bFlCBy/aVx2HrNcqQGsdot8ghrjyrvMCoEA==",
+    "shasum": "5b8a3a7765dfe001261dde915589e782f8c94d1e",
+    "tarball": "https://registry.npmjs.org/left-pad/-/left-pad-1.3.0.tgz",
+    "fileCount": 10,
+    "unpackedSize": 9752,
+    "signatures": [
+      {
+        "keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+        "sig": "MEYCIQD6P3wA64go2fjiRW+yNvdi0x7Jtge3eAxAlwNaK2wyfQIhAKMCJXCFKygnFmsVuppuZIuNzTCYx2WlrJSg8B6wMqZk"
+      }
+    ]
+  },
+  "directories": {},
+  "_npmOperationalInternal": {
+    "host": "s3://npm-registry-packages",
+    "tmp": "tmp/left-pad_1.3.0_1523236245678_0.2849598021556574"
+  },
+  "_hasShrinkwrap": false,
+  "deprecated": "use String.prototype.padStart()"
+}
+"
+`;
+
+exports[`Test NPM API stability NPM show package info commands: NPM \`view\` command. (aliases: \`v\`, \`show\`, and \`info\`) 1`] = `
+"
+left-pad@1.3.0 | WTFPL | deps: none | versions: 15
+String left pad
+https://github.com/stevemao/left-pad#readme
+
+DEPRECATED ⚠️  - use String.prototype.padStart()
+
+keywords: leftpad, left, pad, padding, string, repeat
+
+dist
+.tarball: https://registry.npmjs.org/left-pad/-/left-pad-1.3.0.tgz
+.shasum: 5b8a3a7765dfe001261dde915589e782f8c94d1e
+.integrity: sha512-XI5MPzVNApjAyhQzphX8BkmKsKUxD4LdyK24iZeQGinBN9yTQT3bFlCBy/aVx2HrNcqQGsdot8ghrjyrvMCoEA==
+.unpackedSize: 9.8 kB
+
+maintainers:
+- sebmck <sebmck@gmail.com>
+- stevemao <maochenyan@gmail.com>
+- westlac <cameron.westland@autodesk.com>
+
+dist-tags:
+latest: 1.3.0
+
+published over a year ago by stevemao <maochenyan@gmail.com>
+"
+`;

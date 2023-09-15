@@ -1,18 +1,19 @@
 import { AsyncReadline as rl } from "./custom-utils"
-import { ReadDefaultAnswer, SetDefaultAnswer, Answer/* , PromptAnswer */ } from "./answer"
-export { Answer } from "./answer"
-/** 
+import type { ReadDefaultAnswer, SetDefaultAnswer, Answer /* , PromptAnswer */ } from "./answer"
+/**
  * @debrief - This module coerces user responces to a yes or no answer object.
- */ 
+ */
 
 // user input interpreter for confirmation:
 export class Confirmer {
   readonly #_defaultAnswer: ReadDefaultAnswer
   /** @todo */
   //readonly #_userResTypePrompt: UserResTypePrompt
-  
+
   /** @todo */
-  constructor({ toYes = false, toNo = false }: SetDefaultAnswer = { toYes: false, toNo: false }, /* userResTypePrompt: string */){
+  constructor(
+    { toYes = false, toNo = false }: SetDefaultAnswer = { toYes: false, toNo: false } /* userResTypePrompt: string */
+  ) {
     this.#_defaultAnswer = { toYes, toNo }
   }
 
@@ -29,25 +30,25 @@ export class Confirmer {
       // user responce wasn't "yes" or "no":
       isDefault: true
     }
-  
+
     // check if the responce is yes:
-    if (responce.match(/^ *y(?:es)?/i)){
-      answerInfo.isDefault = false;
-      answerInfo.isYes = true;
-    } 
-    // check if the responce is no:
-    else if (responce.match(/^ *no?/i)){
-      answerInfo.isDefault = false;
-      answerInfo.isNo = true;
+    if (responce.match(/^ *y(?:es)?/i)) {
+      answerInfo.isDefault = false
+      answerInfo.isYes = true
     }
-  
+    // check if the responce is no:
+    else if (responce.match(/^ *no?/i)) {
+      answerInfo.isDefault = false
+      answerInfo.isNo = true
+    }
+
     return answerInfo
   }
 
   /** @todo */
   async ask(question: string): Promise<Answer> {
     const responce = await rl.question(question)
-    
+
     return this.interpret(responce)
   }
 }

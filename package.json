@@ -1,20 +1,28 @@
 {
-  "name": "npm-super-pack",
+  "name": "npm-backup",
   "version": "0.1.0",
-  "description": "This will make an offline backup of an NPM package.",
+  "description": "Makes an offline backup of an NPM package.",
   "main": "./bin/backup.js",
+  "author": "Nyctfall <80650685+nyctfall@users.noreply.github.com>",
+  "license": "MIT",
   "bin": {
-    "npm-super-pack": "./bin/backup.js"
+    "npm-backup": "./bin/backup.js"
   },
   "scripts": {
     "test": "jest __tests__/*.ts",
+    "lint": "eslint .",
+    "format": "prettier .",
+    "spellcheck": "cspell",
+    "pre-commit": "lint-staged --verbose",
     "dev": "tsc --build --watch --pretty --verbose",
-    "build": "tsc --build --pretty --verbose",
+    "esbuild": "node esbuild.mjs",
+    "build": "npm run esbuild && tsc --build --pretty --verbose --declaration --emitDeclarationOnly",
     "start": "node ./bin/backup.js",
-    "npm-super-pack": "node ./bin/backup.js"
+    "npm-backup": "node ./bin/backup.js",
+    "prepare": "husky install && node esbuild.mjs"
   },
   "engines": {
-    "node": ">= 12"
+    "node": ">= 16"
   },
   "keywords": [
     "backup",
@@ -29,18 +37,17 @@
     "npm",
     "pack"
   ],
-  "author": "Nyctfall <80650685+nyctfall@users.noreply.github.com>",
-  "license": "MIT",
   "dependencies": {
-    "chalk": "^5.0.1",
+    "chalk": "^5.3.0",
     "commander": "^9.3.0",
     "fs-extra": "^10.1.0",
     "inquirer": "^8.2.4",
-    "semver": "^7.3.7"
+    "semver": "^7.5.4",
+    "validate-npm-package-name": "^5.0.0"
   },
   "peerDependencies": {
     "npm": ">=6.x.x",
-    "yarn": ">=0.x.x"
+    "yarn": ">=0.x.x || >=1.x.x"
   },
   "peerDependenciesMeta": {
     "npm": {
@@ -51,44 +58,43 @@
     }
   },
   "devDependencies": {
-    "@babel/cli": "^7.18.6",
-    "@babel/core": "^7.18.6",
-    "@babel/eslint-parser": "^7.18.2",
-    "@babel/eslint-plugin": "^7.17.7",
-    "@babel/plugin-transform-typescript": "^7.18.6",
-    "@babel/preset-env": "^7.18.6",
-    "@babel/preset-typescript": "^7.18.6",
-    "@types/eslint": "^7.29.0",
-    "@types/fs-extra": "^9.0.13",
-    "@types/gulp": "^4.0.9",
-    "@types/inquirer": "^8.2.1",
-    "@types/jest": "^27.5.2",
-    "@types/node": "^14.18.21",
-    "@types/prettier": "^2.6.3",
-    "@types/semver": "^7.3.10",
-    "@typescript-eslint/eslint-plugin": "^4.33.0",
-    "@typescript-eslint/parser": "^4.33.0",
-    "babel-jest": "^27.5.1",
-    "concurrently": "^7.3.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.5.0",
+    "@types/eslint": "8.x.x",
+    "@types/fs-extra": "^11.0.1",
+    "@types/gulp": "^4.0.13",
+    "@types/inquirer": "8.x.x",
+    "@types/jest": "^29.5.3",
+    "@types/node": "^20.4.2",
+    "@types/semver": "^7.5.0",
+    "@typescript-eslint/eslint-plugin": "^6.3.0",
+    "@typescript-eslint/parser": "^6.3.0",
+    "babel-jest": "^29.6.2",
+    "cli-mocker": "^1.0.4",
+    "concurrently": "^8.2.0",
+    "cspell": "^7.3.2",
+    "esbuild": "^0.19.2",
+    "eslint": "^8.46.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
     "gulp": "^4.0.2",
     "gulp-babel": "^8.0.0",
     "gulp-cli": "^2.3.0",
     "gulp-eslint": "^6.0.0",
     "gulp-jest": "^4.0.4",
     "gulp-jsdoc3": "^3.0.0",
-    "gulp-prettier": "^4.0.0",
-    "gulp-typescript": "^6.0.0-alpha.1",
-    "jest": "^27.5.1",
-    "jsdoc": "^3.6.10",
-    "prettier": "^2.7.1",
-    "ts-jest": "^27.1.5",
-    "ts-node": "^10.8.1",
-    "typescript": "^4.7.4",
-    "yargs": "^17.5.1"
+    "gulp-prettier": "^5.0.0",
+    "gulp-typescript": "6.0.0-alpha.1",
+    "husky": "^8.0.3",
+    "jest": "^29.6.2",
+    "jsdoc": "^4.0.2",
+    "lint-staged": "^14.0.1",
+    "prettier": "^3.0.0",
+    "prettier-eslint": "^15.0.1",
+    "ts-jest": "^29.1.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.6",
+    "vitest": "^0.34.3",
+    "yargs": "^17.7.2"
   },
-  "private": "true",
   "repository": {
     "type": "git",
     "url": "git://github.com/nyctfall/npm-backup.git"

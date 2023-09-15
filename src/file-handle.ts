@@ -1,6 +1,14 @@
-import { BaseEncodingOptions, Dir, PathLike } from "fs"
+import { Dir, PathLike } from "fs"
+import type { EncodingOption } from "fs"
 import { tmpdir } from "os"
-import { mkdtemp, mkdir, readFile, writeFile, opendir, rm/* rename, open, rmdir, stat, FileHandle */} from "fs/promises"
+import {
+  mkdtemp,
+  mkdir,
+  readFile,
+  writeFile,
+  opendir,
+  rm /* rename, open, rmdir, stat, FileHandle */
+} from "fs/promises"
 import { move } from "fs-extra"
 import { /* PlatformPath, */ posix as path } from "path"
 export { chdir, cwd } from "process"
@@ -14,10 +22,10 @@ const { basename, join } = path
  * // From NPM Docs:
  * In cases where you need to preserve npm packages locally or have them available through a single file download, you can bundle the packages in a tarball file by specifying the package names in the bundledDependencies array and executing `npm pack`.
  *
- * // Compatiblity note:
+ * // Compatibility note:
  * If this is spelled "bundleDependencies", then that is also honored.
  *
- * // MVP - M.inimum V.iable P.roduct:
+ * // MVP - Minimum Viable Product:
  * @goal1 - read NPM pkg file: "package.json".
  * @goal2 - read package.json fields: "dependencies", "devDependencies", "peerDependencies", "optionalDependencies", and "bundle(d)Dependencies".
  * @goal3 - write to package.json field: "bundle(d)Dependencies".
@@ -26,7 +34,7 @@ const { basename, join } = path
  * @goal6 - delete tmp install dir after pkg dir move.
  *
  * @todo:
- * // @goalX - Digest file, it lists every pkg backed up and lists every variety of dependancy installed.
+ * // @goalX - Digest file, it lists every pkg backed up and lists every variety of dependency installed.
  * // @goalX - SHA2/SHA3 checksums file, to ensure integrity of pkg backup files.
  */
 
@@ -49,17 +57,17 @@ export interface NPMPackageJSON {
 }
 
 export type FSPath = PathLike & string
-export const PackageJSON: string = "package.json"
+export const PackageJSON = "package.json"
 export const PackageJSONEncodingFormat: string & BufferEncoding = "utf8"
 
 // read the package.json on the pkg dir:
 export const readPkgJSON = async (containingDirPath: FSPath): Promise<NPMPackageJSON> => {
   // create the path to the package.json:
   const path = join(containingDirPath, PackageJSON)
-  
+
   // read the package.json:
   const file = await readFile(path, PackageJSONEncodingFormat)
-  
+
   // make the JSON text file an object:
   return JSON.parse(file)
 }
@@ -68,18 +76,19 @@ export const readPkgJSON = async (containingDirPath: FSPath): Promise<NPMPackage
 export const writePkgJSON = async (containingDirPath: FSPath, newPkgJSON: NPMPackageJSON, signal?: AbortSignal) => {
   // create the path to the package.json:
   const path = join(containingDirPath, PackageJSON)
-  
+
   // convert the JSON object into JSON text:
   const file = JSON.stringify(newPkgJSON, undefined, 2)
-  
+
   // write JSON text to the package.json:
   return await writeFile(path, file, {
     encoding: PackageJSONEncodingFormat,
     signal
-  } as BaseEncodingOptions)
+  } as EncodingOption)
 }
 
-export const makeTmpDir = async (prefix: FSPath = "tmp-install-dir-"): Promise<FSPath> => await mkdtemp(join(tmpdir(), prefix))
+export const makeTmpDir = async (prefix: FSPath = "tmp-install-dir-"): Promise<FSPath> =>
+  await mkdtemp(join(tmpdir(), prefix))
 
 export const moveToDir = async (file: FSPath, dest: FSPath) => await move(file, join(dest, basename(file)))
 
@@ -91,4 +100,3 @@ export const makeDir = async (dirName: FSPath): Promise<Dir> => {
 export const removeDir = async (dirName: FSPath) => await rm(dirName, { recursive: true })
 
 export const removePath = async (dirName: FSPath) => await rm(dirName, { recursive: true })
-

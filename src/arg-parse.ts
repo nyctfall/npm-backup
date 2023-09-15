@@ -8,164 +8,244 @@ export { Command } from "commander"
  */
 
 /** */
-const verboseHandler = (placeholder: unknown, previousVerbosityLevel: number) => {
-  void placeholder // used to satisfy typescript
+const verboseHandler = (_: unknown, previousVerbosityLevel: number) => {
   return Number(previousVerbosityLevel) + 1
 }
-const dbgHandler = (placeholder: unknown, previousDebugLevel: number) => {
-  void placeholder // used to satisfy typescript
+const dbgHandler = (_: unknown, previousDebugLevel: number) => {
   return Number(previousDebugLevel) + 1
 }
 /**
- * 
+ *
  */
- export const commander = createCommand("npm-super-pack")
- .version("0.1.0")
- .description("A program to install NPM packages offline.")
- .combineFlagAndOptionalValue(false) // disable non-standard/uncommon option formats that cause unwanted conflicts with other options
-//  .exitOverride() // disable Commander directly aborting Node.js process by exit on error itself
- .usage("[options] package [packages...]")
- .usage("[options] package [packages...] [--dest|--save [path]]")
-// .usage("[options] path [path...]") /** @TODO */
- .argument("<package>", "The NPM package to install, is also used for installing offline packages.")
-//  .argument("[path]", "The file location the NPM package will be downloaded to.") /** @TODO */
- /* .addOption(
+export const commander = createCommand("npm-super-pack")
+  .version("0.1.0")
+  .description("A program to install NPM packages offline.")
+  .combineFlagAndOptionalValue(false) // disable non-standard/uncommon option formats that cause unwanted conflicts with other options
+  //  .exitOverride() // disable Commander directly aborting Node.js process by exit on error itself
+  .usage("[options] package [packages...]")
+  .usage("[options] package [packages...] [--dest|--save [path]]")
+  // .usage("[options] path [path...]") /** @TODO */
+  .argument("<package>", "The NPM package to install, is also used for installing offline packages.")
+  //  .argument("[path]", "The file location the NPM package will be downloaded to.") /** @TODO */
+  /* .addOption(
   new Option("--production=[boolean], --production", "If true, save only the production dependencies of the package(s)")
    .choices(["true", "false"])
    .default("true")
  ) */
- .option("--production=[boolean], --production", "If true, save only the production dependencies of the package(s)")
- .addOption(
-  new Option("-P, --save-prod, --production=true, --production", "Save the production dependencies of the package(s).")
- )
- .addOption(
-  new Option("-B, --save-bundle", "Save the bundled dependencies of the package(s), this is the normal behavior of npm pack.")
- )
- .addOption(
-  new Option("-D, --save-dev, --production=false", "Save both the production and dev dependencies of the package(s).")
-   .implies({ saveProd: true })
- )
- .addOption(
-  new Option("-O, --save-optional", "Save the production, dev, and optional dependencies of the package(s).")
-   .implies({ saveProd: true, saveDev: true })
- )
- .addOption(
-  new Option("--save-peer", "Save the peer dependencies of the package(s).")
-   .implies({ saveProd: true })
- )
- .addOption(new Option("--save <path>", "Install package to file system location, also saves package to NPM's internal cache (_cacache).").conflicts("noSave"))
- .addOption(new Option("--dest <path>", "Install package to file system location, also saves package to NPM's internal cache (_cacache).").conflicts("noSave"))
- .addOption(new Option("--pack-destination <path>", "Install package to file system location, also saves package to NPM's internal cache (_cacache).").conflicts("noSave"))
- .addOption(new Option("--package-destination <path>", "Install package to file system location, also saves package to NPM's internal cache (_cacache).").conflicts("noSave"))
- .addOption(new Option("--no-save", "Does not install package, only saves package to NPM's internal cache (\"_cacache\").").conflicts("save"))
- .option("-E, --save-exact", "Saved dependencies will be configured with an exact version rather than using NPM's default semver range operator.")
- .option("-n, --dry-run", "Do not actually do anything, just print what would be done.")
- .option("-f, --force", "Override any warnings.")
- .option("-v, --verbose", "Print extra information.", verboseHandler, 0)
- .addOption(
-  new Option("--debug", "Print debug information, use repeatedly to print more information.")
-   .implies({ verbose: true })
-   .argParser(dbgHandler)
-   .default(0)
-   .preset(0)
- )
- .option("--legacy-bundling", "Eliminates all automatic deduping and causes npm to install the package such that versions of npm prior to 1.4, such as the one included with node 0.8, can install the package.")
- .addOption(
-  new Option("--omit <dependency types...>",'"prod", "dev", "optional", "bundle", or "peer" (can be set multiple times). Dependency types to omit from the installation. If a package type appears in both the --include and --omit lists, then it will be included.')
-   .choices(["prod", "production", "dev", "optional", "bundle", "bundled", "peer"])
- )
- .addOption(
-  new Option("--include <dependency types...>",'"prod", "dev", "optional", "bundle", or "peer" (can be set multiple times). Allows for defining which types of dependencies to install. This is the inverse of --omit=<type>. Dependency types specified in --include will not be omitted, regardless of the order in which omit/include are specified on the command-line.')
-   .choices(["prod", "dev", "optional", "peer"])
- )
- .addOption(
-  new Option("--strict-peer-deps", "If set to true, and --legacy-peer-deps is not set, then any conflicting peerDependencies will be treated as an install failure.")
-   .conflicts("legacyPeerDeps")
- )
- .addOption(
-  new Option("--legacy-peer-deps", "Causes npm to completely ignore peerDependencies, as in npm versions 3 through 6. If a package cannot be installed because of overly strict peerDependencies that collide, it provides a way to move forward resolving the situation. Use of legacy-peer-deps is not recommended, as it will not enforce the peerDependencies contract that meta-dependencies may rely on.")
-   .conflicts("strictPeerDeps")
- )
- .option("--ignore-scripts", "Eliminates all automatic deduping and causes npm to install the package such that versions of npm prior to 1.4, such as the one included with node 0.8, can install the package.")
- .option("-y, --yes, --no-interactive, --auto, --automated", "Assumes yes to all questions, and don't ask for user input.")
- .option("-i, --interactive", "Show pretty menus to view, select, confirm, or change packages.")
- .option("--tag <tag>", "Install a package without giving a specific version, install the specified tag. ex: \"latest\"")
- .option("--proxy [url]", "A proxy to use for outgoing http requests. If the NPM HTTP_PROXY or http_proxy environment variables are set, proxy settings will be honored by NPM's underlying request library.")
- .option("--https-proxy [url]", "A proxy to use for outgoing https requests. If the NPM HTTPS_PROXY or https_proxy or HTTP_PROXY or http_proxy environment variables are set, proxy settings will be honored by the underlying make-fetch-happen library.")
- .option("--no-proxy <domain extentions...>, --noproxy <domain extentions...>", "Domain extensions that should bypass any proxies, (can be set multiple times). Also accepts a comma-delimited string. The default value is the NPM NO_PROXY environment variable.")
- /* .addOption(
+  .option("--production=[boolean], --production", "If true, save only the production dependencies of the package(s)")
+  .addOption(
+    new Option(
+      "-P, --save-prod, --production=true, --production",
+      "Save the production dependencies of the package(s)."
+    )
+  )
+  .addOption(
+    new Option(
+      "-B, --save-bundle",
+      "Save the bundled dependencies of the package(s), this is the normal behavior of npm pack."
+    )
+  )
+  .addOption(
+    new Option(
+      "-D, --save-dev, --production=false",
+      "Save both the production and dev dependencies of the package(s)."
+    ).implies({ saveProd: true })
+  )
+  .addOption(
+    new Option("-O, --save-optional", "Save the production, dev, and optional dependencies of the package(s).").implies(
+      { saveProd: true, saveDev: true }
+    )
+  )
+  .addOption(new Option("--save-peer", "Save the peer dependencies of the package(s).").implies({ saveProd: true }))
+  .addOption(
+    new Option(
+      "--save <path>",
+      "Install package to file system location, also saves package to NPM's internal cache (_cacache)."
+    ).conflicts("noSave")
+  )
+  .addOption(
+    new Option(
+      "--dest <path>",
+      "Install package to file system location, also saves package to NPM's internal cache (_cacache)."
+    ).conflicts("noSave")
+  )
+  .addOption(
+    new Option(
+      "--pack-destination <path>",
+      "Install package to file system location, also saves package to NPM's internal cache (_cacache)."
+    ).conflicts("noSave")
+  )
+  .addOption(
+    new Option(
+      "--package-destination <path>",
+      "Install package to file system location, also saves package to NPM's internal cache (_cacache)."
+    ).conflicts("noSave")
+  )
+  .addOption(
+    new Option(
+      "--no-save",
+      'Does not install package, only saves package to NPM\'s internal cache ("_cacache").'
+    ).conflicts("save")
+  )
+  .option(
+    "-E, --save-exact",
+    "Saved dependencies will be configured with an exact version rather than using NPM's default semver range operator."
+  )
+  .option("-n, --dry-run", "Do not actually do anything, just print what would be done.")
+  .option("-f, --force", "Override any warnings.")
+  .option("-v, --verbose", "Print extra information.", verboseHandler, 0)
+  .addOption(
+    new Option("--debug", "Print debug information, use repeatedly to print more information.")
+      .implies({ verbose: true })
+      .argParser(dbgHandler)
+      .default(0)
+      .preset(0)
+  )
+  .option(
+    "--legacy-bundling",
+    "Eliminates all automatic deduping and causes npm to install the package such that versions of npm prior to 1.4, such as the one included with node 0.8, can install the package."
+  )
+  .addOption(
+    new Option(
+      "--omit <dependency types...>",
+      '"prod", "dev", "optional", "bundle", or "peer" (can be set multiple times). Dependency types to omit from the installation. If a package type appears in both the --include and --omit lists, then it will be included.'
+    ).choices(["prod", "production", "dev", "optional", "bundle", "bundled", "peer"])
+  )
+  .addOption(
+    new Option(
+      "--include <dependency types...>",
+      '"prod", "dev", "optional", or "peer" (can be set multiple times). Allows for defining which types of dependencies to install. This is the inverse of --omit=<type>. Dependency types specified in --include will not be omitted, regardless of the order in which omit/include are specified on the command-line.'
+    ).choices(["prod", "dev", "optional", "peer"])
+  )
+  .addOption(
+    new Option(
+      "--strict-peer-deps",
+      "If set to true, and --legacy-peer-deps is not set, then any conflicting peerDependencies will be treated as an install failure."
+    ).conflicts("legacyPeerDeps")
+  )
+  .addOption(
+    new Option(
+      "--legacy-peer-deps",
+      "Causes npm to completely ignore peerDependencies, as in npm versions 3 through 6. If a package cannot be installed because of overly strict peerDependencies that collide, it provides a way to move forward resolving the situation. Use of legacy-peer-deps is not recommended, as it will not enforce the peerDependencies contract that meta-dependencies may rely on."
+    ).conflicts("strictPeerDeps")
+  )
+  .option(
+    "--ignore-scripts",
+    "Eliminates all automatic deduping and causes npm to install the package such that versions of npm prior to 1.4, such as the one included with node 0.8, can install the package."
+  )
+  .option(
+    "-y, --yes, --no-interactive, --auto, --automated",
+    "Assumes yes to all questions, and don't ask for user input."
+  )
+  .option("-i, --interactive", "Show pretty menus to view, select, confirm, or change packages.")
+  .option("--tag <tag>", 'Install a package without giving a specific version, install the specified tag. ex: "latest"')
+  .option(
+    "--proxy [url]",
+    "A proxy to use for outgoing http requests. If the NPM HTTP_PROXY or http_proxy environment variables are set, proxy settings will be honored by NPM's underlying request library."
+  )
+  .option(
+    "--https-proxy [url]",
+    "A proxy to use for outgoing https requests. If the NPM HTTPS_PROXY or https_proxy or HTTP_PROXY or http_proxy environment variables are set, proxy settings will be honored by the underlying make-fetch-happen library."
+  )
+  .option(
+    "--no-proxy <domain extentions...>, --noproxy <domain extentions...>",
+    "Domain extensions that should bypass any proxies, (can be set multiple times). Also accepts a comma-delimited string. The default value is the NPM NO_PROXY environment variable."
+  )
+  /* .addOption(
   new Option("--progress=[boolean], --progress", "Display download and install progress reports. Default true.")
    .choices(["true", "false"])
    .default("true")
  ) */
- .option("--progress=[boolean], --progress", "Display download and install progress reports. Default true.")
- /* .addOption(
+  .option("--progress=[boolean], --progress", "Display download and install progress reports. Default true.")
+  /* .addOption(
   new Option("--ignore-scripts <boolean>", "If true, npm does not run scripts specified in package.json files. Note that commands explicitly intended to run a particular script, such as npm start, npm stop, npm restart, npm test, and npm run-script will still run their intended script if ignore-scripts is set, but they will not run any pre-scripts or post-scripts. Default false.")
    .choices(["true", "false"])
    .default("false")
  ) */
- .option("--ignore-scripts <boolean>", "If true, npm does not run scripts specified in package.json files. Note that commands explicitly intended to run a particular script, such as npm start, npm stop, npm restart, npm test, and npm run-script will still run their intended script if ignore-scripts is set, but they will not run any pre-scripts or post-scripts. Default false.")
- .option("--no-progress", "Eliminates all progress reporting.")
- .option("--prefer-online", "If true, NPM staleness checks for cached data will be forced, always looking for fresh package data.")
- .option("--prefer-offline", "If true, NPM staleness checks for cached data will be bypassed, but missing data will be requested from the server. To force full offline mode, use --offline.")
- .option("--offline", "If true, NPM packages will be not be downloaded, but be sourced from the previously installed backups or NPM's cache.")
- .option("--package <packages...>, --packages <packages...>", "Clearly define the names of the package(s) to be installed.")
- .option("--node-version", "The nodeJS version to use when checking a package's \"engines\" setting.")
- .option("--max-sockets <number>, --maxsockets <number>", "The maximum number of connections to use per origin (protocol/host/port combination).")
- .option("--foreground-scripts", "Run all NPM build scripts (preinstall, install, and postinstall) for installed packages in the foreground process, sharing standard input, output, and error with the main NPM process. Note that this will generally make installs run slower, and be much noisier, but can be useful for debugging.")
- /* .addOption(
+  .option(
+    "--ignore-scripts <boolean>",
+    "If true, npm does not run scripts specified in package.json files. Note that commands explicitly intended to run a particular script, such as npm start, npm stop, npm restart, npm test, and npm run-script will still run their intended script if ignore-scripts is set, but they will not run any pre-scripts or post-scripts. Default false."
+  )
+  .option("--no-progress", "Eliminates all progress reporting.")
+  .option(
+    "--prefer-online",
+    "If true, NPM staleness checks for cached data will be forced, always looking for fresh package data."
+  )
+  .option(
+    "--prefer-offline",
+    "If true, NPM staleness checks for cached data will be bypassed, but missing data will be requested from the server. To force full offline mode, use --offline."
+  )
+  .option(
+    "--offline",
+    "If true, NPM packages will be not be downloaded, but be sourced from the previously installed backups or NPM's cache."
+  )
+  .option(
+    "--package <packages...>, --packages <packages...>",
+    "Clearly define the names of the package(s) to be installed."
+  )
+  .option("--node-version", 'The nodeJS version to use when checking a package\'s "engines" setting.')
+  .option(
+    "--max-sockets <number>, --maxsockets <number>",
+    "The maximum number of connections to use per origin (protocol/host/port combination)."
+  )
+  .option(
+    "--foreground-scripts",
+    "Run all NPM build scripts (preinstall, install, and postinstall) for installed packages in the foreground process, sharing standard input, output, and error with the main NPM process. Note that this will generally make installs run slower, and be much noisier, but can be useful for debugging."
+  )
+  /* .addOption(
   new Option("--loglevel <level>, --log-level <level>, --npm-log-level <level>","")
    .choices(["silent", "error", "warn", "notice", "http", "timing", "info", "verbose", "silly"])
    .default("notice")
  ) */
- .addOption(
-  new Option("--loglevel <level>, --log-level <level>, --npm-log-level <level>","The logging detail NPM uses.")
-   .choices(["silent", "error", "warn", "notice", "http", "timing", "info", "verbose", "silly"])
- )
-
+  .addOption(
+    new Option(
+      "--loglevel <level>, --log-level <level>, --npm-log-level <level>",
+      "The logging detail NPM uses."
+    ).choices(["silent", "error", "warn", "notice", "http", "timing", "info", "verbose", "silly"])
+  )
 
 /**
- * 
+ *
  */
-export const argParserQ = new OpsPipeline("Argument Parser"/* , { useDebug: true, useVerbose: false } */)
-  .pipe(({ argv, parser }: { argv: string[], parser: Command }) => {
+export const argParserQ = new OpsPipeline("Argument Parser" /* , { useDebug: true, useVerbose: false } */)
+  .pipe(({ argv, parser }: { argv: string[]; parser: Command }) => {
     // use only the user input, not the node path or executable name:
     if (argv === process.argv) argv = argv.slice(2)
-    
+
     return {
       argv,
       parser
     }
   }, "Prepare ArgV")
-  .pipe(({ argv, parser }: { argv: string[], parser: Command }) => {
+  .pipe(({ argv, parser }: { argv: string[]; parser: Command }) => {
     return {
       args: argvSanitize(argv),
       parser
     }
   }, "Input Sanitization")
-  .pipe(({ args, parser }: { args: string[], parser: Command }) => {
+  .pipe(({ args, parser }: { args: string[]; parser: Command }) => {
     return parser.parse(args, { from: "user" })
   }, "Parsing Commands, Arguments, And Options")
 
 /**
- * 
+ *
  */
 export const argParser = (argv: string[] = process.argv, parser: Command = commander, Q: OpsPipeline = argParserQ) => {
   // use only the sanitized options and parse the options and arguments:
   return Q.start({ argv, parser })
 }
 
-/** 
- * 
+/**
+ *
  */
 export const command = async (argv: string[] = process.argv.slice(2)): Promise<Command> => {
   return (await argParser(argv, commander)).pipe[0] as Command
 }
 
-/** 
- * 
+/**
+ *
  */
-export const options = (command)()
+export const options = command()
 
 /*
 NPM package.json: (excerpt)
@@ -438,8 +518,7 @@ NPM pack configuration options:
 
   Description
       For  anything  that's installable (that is, a package folder, tarball, tarball url, git url, name@tag, name@version, name, or
-      scoped name), this command will fetch it to the cache, copy the tarball to the  current  working  directory  as  <name>-<ver‐
-      sion>.tgz, and then write the filenames out to stdout.
+      scoped name), this command will fetch it to the cache, copy the tarball to the  current  working  directory  as  <name>-<version>.tgz, and then write the filenames out to stdout.
 
       If the same package is specified multiple times, then the file will be overwritten the second time.
 
@@ -470,8 +549,7 @@ NAME
       those  lowercase versions over any uppercase ones that you might set. For details see this issue
       https://github.com/npm/npm/issues/14528.
 
-      Notice  that  you  need to use underscores instead of dashes, so --allow-same-version would become npm_config_allow_same_ver‐
-      sion=true.
+      Notice  that  you  need to use underscores instead of dashes, so --allow-same-version would become npm_config_allow_same_version=true.
 
   npmrc Files
       The four relevant files are:
@@ -481,8 +559,7 @@ NAME
       • per-user configuration file (defaults to $HOME/.npmrc; configurable via CLI option  --userconfig  or  environment  variable
         $NPM_CONFIG_USERCONFIG)
 
-      • global  configuration  file (defaults to $PREFIX/etc/npmrc; configurable via CLI option --globalconfig or environment vari‐
-        able $NPM_CONFIG_GLOBALCONFIG)
+      • global  configuration  file (defaults to $PREFIX/etc/npmrc; configurable via CLI option --globalconfig or environment variable $NPM_CONFIG_GLOBALCONFIG)
 
       • npm's built-in configuration file (/path/to/npm/npmrc)
 
@@ -583,7 +660,7 @@ NAME
       If  multiple  single-character  shorthands are strung together, and the resulting combination is unambiguously not some other
       configuration param, then it is expanded to its various component pieces.  For example:
 
-        npm ls -gpld
+        npm ls -g -p -l -d
         # same as:
         npm ls --global --parseable --long --loglevel info
 
@@ -613,8 +690,7 @@ NAME
 
       • Type: Boolean
 
-      When  running npm outdated and npm ls, setting --all will show all outdated or installed packages, rather than only those di‐
-      rectly depended upon by the current project.
+      When  running npm outdated and npm ls, setting --all will show all outdated or installed packages, rather than only those directly depended upon by the current project.
 
   allow-same-version
       • Default: false
@@ -709,8 +785,7 @@ NAME
 
       • Type: String
 
-      Optional companion option for npm exec, npx that allows for specifying a custom command to be run alonwith the installed
-      packages.
+      Optional companion option for npm exec, npx that allows for specifying a custom command to be run along with the installed packages.
 
         npm exec --package yo --package generator-node --call "yo node"
 
@@ -763,8 +838,7 @@ NAME
 
       The depth to go when recursing packages for npm ls.
 
-      If not set, npm ls will show only the immediate dependencies of the root project. If --all is set, then npm will show all de‐
-      pendencies by default.
+      If not set, npm ls will show only the immediate dependencies of the root project. If --all is set, then npm will show all dependencies by default.
 
   description
       • Default: true
@@ -901,8 +975,7 @@ NAME
 
       • Type: Boolean
 
-      Removes various protections against unfortunate side effects, common mistakes, unnecessary performance degradation, and mali‐
-      cious input.
+      Removes various protections against unfortunate side effects, common mistakes, unnecessary performance degradation, and malicious input.
 
       • Allow clobbering non-npm files in global installs.
 
@@ -986,8 +1059,7 @@ NAME
 
       • Type: Boolean
 
-      Causes npm to install the package into your local node_modules folder with the same layout it uses with the global  node_mod‐
-      ules folder. Only your direct dependencies will show in node_modules and everything they depend on will be flattened in their
+      Causes npm to install the package into your local node_modules folder with the same layout it uses with the global  node_modules folder. Only your direct dependencies will show in node_modules and everything they depend on will be flattened in their
       node_modules folders. This obviously will eliminate some deduping. If used with legacy-bundling, legacy-bundling will be pre‐
       ferred.
 
@@ -1010,16 +1082,14 @@ NAME
 
       • Type: null or URL
 
-      A  proxy  to use for outgoing https requests. If the HTTPS_PROXY or https_proxy or HTTP_PROXY or http_proxy environment vari‐
-      ables are set, proxy settings will be honored by the underlying make-fetch-happen library.
+      A  proxy  to use for outgoing https requests. If the HTTPS_PROXY or https_proxy or HTTP_PROXY or http_proxy environment variables are set, proxy settings will be honored by the underlying make-fetch-happen library.
 
   if-present
       • Default: false
 
       • Type: Boolean
 
-      If true, npm will not exit with an error code when run-script is invoked for a script that isn't defined in the scripts  sec‐
-      tion  of  package.json.  This option can be used when it's desirable to optionally run a script when it's present and fail if
+      If true, npm will not exit with an error code when run-script is invoked for a script that isn't defined in the scripts  section  of  package.json.  This option can be used when it's desirable to optionally run a script when it's present and fail if
       the script fails. This is useful, for example, when running scripts that may only apply  for  some  builds  in  an  otherwise
       generic CI setup.
 
@@ -1258,8 +1328,7 @@ NAME
 
       If a package type appears in both the --include and --omit lists, then it will be included.
 
-      If the resulting omit list includes 'dev', then the NODE_ENV environment variable will be set to 'production' for all lifecy‐
-      cle scripts.
+      If the resulting omit list includes 'dev', then the NODE_ENV environment variable will be set to 'production' for all lifecycle scripts.
 
   otp
       • Default: null
@@ -1304,8 +1373,7 @@ NAME
 
       If set to true, the current operation will only use the package-lock.json, ignoring node_modules.
 
-      For update this means only the package-lock.json will be updated, instead of checking node_modules and downloading  dependen‐
-      cies.
+      For update this means only the package-lock.json will be updated, instead of checking node_modules and downloading  dependencies.
 
       For  list  this  means  the  output will be based on the tree described by the package-lock.json, rather than the contents of
       node_modules.
@@ -1335,8 +1403,7 @@ NAME
       data.
 
   prefix
-      • Default:  In global mode, the folder where the node executable is installed.  In local mode, the nearest parent folder con‐
-        taining either a package.json file or a node_modules folder.
+      • Default:  In global mode, the folder where the node executable is installed.  In local mode, the nearest parent folder containing either a package.json file or a node_modules folder.
 
       • Type: Path
 
@@ -1451,8 +1518,7 @@ NAME
 
       • Type: Boolean
 
-      Save  installed packages into dependencies specifically. This is useful if a package already exists in devDependencies or op‐
-      tionalDependencies, but you want to move it to be a non-optional production dependency.
+      Save  installed packages into dependencies specifically. This is useful if a package already exists in devDependencies or optionalDependencies, but you want to move it to be a non-optional production dependency.
 
       This is the default behavior if --save is true, and neither --save-dev or --save-optional are true.
 
@@ -1584,8 +1650,7 @@ NAME
       If set, alters the prefix used when tagging a new version when performing a version increment using  npm-version.  To  remove
       the prefix altogether, set it to the empty string: "".
 
-      Because  other tools may rely on the convention that npm version tags look like v1.0.0, only use this property if it is abso‐
-      lutely necessary. In particular, use care when overriding this setting for public packages.
+      Because  other tools may rely on the convention that npm version tags look like v1.0.0, only use this property if it is absolutely necessary. In particular, use care when overriding this setting for public packages.
 
   timing
       • Default: false
@@ -1615,7 +1680,7 @@ NAME
 
   unicode
       • Default: false on windows, true on mac/unix systems with a unicode locale, as defined by the LC_ALL, LC_CTYPE, or LANG  en‐
-        vironment variables.
+        environment variables.
 
       • Type: Boolean
 

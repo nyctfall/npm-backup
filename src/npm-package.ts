@@ -1,12 +1,12 @@
-import { ExecFileAsyncResult, ExecFileResult, utilPromise } from "./custom-utils"
+import * as path from "path"
 import * as semver from "semver"
-import * as inquirer from "inquirer"
+import inquirer from "inquirer"
+import { cwd, chdir } from "process"
+import type { OptionValues } from "commander"
 import { OpsPipeline as Q } from "./op-queue-pipeline"
 import { argvSanitize, argSanitize } from "./arg-parse-utils"
-import { FSPath } from "./file-handle"
-import { cwd, chdir } from "process"
-import { OptionValues } from "commander"
-import * as path from "path"
+import { ExecFileAsyncResult, ExecFileResult, utilPromise } from "./custom-utils"
+import type { FSPath } from "./file-handle"
 
 /**
   @debrief - This module has all of the NPM search, pkg installing, and other NPM commands.
@@ -21,14 +21,14 @@ import * as path from "path"
     * 
     * Extra:
       * multi-pkg backups, with many pkgs's deps installed and deduped
-      * chronlogical acrhive mode that backs up all versions {major.minor.patch}
+      * chronlogical archive mode that backs up all versions {major.minor.patch}
     * 
   * Run:
     * sanitize user input:
       * remove ALL characters that aren't used on NPM
       * only allow: '.' '@', '/', '-', A-Z, a-z, and 0-9
     * 
-    * get user confimation of desired pkgs:
+    * get user confirmation of desired pkgs:
       * use NPM search for every string arg, to prevent misspelling
       * use NPM view to confirm properly spelled pkgs
     * 
@@ -44,7 +44,7 @@ import * as path from "path"
     * 
     * make offline NPM pkg backup:
       * use npm pack, adds pkg to NPM cache
-      * OR use tar -cwzvf /path/to/bkup/dir NPM-pkg-dir
+      * OR use tar -cwzvf /path/to/backup/dir NPM-pkg-dir
       * -z is to select gzip compression
       * this doesn't add pkg to NPM cache
     *
@@ -54,11 +54,74 @@ import * as path from "path"
   * 
 */
 
-
 const { execFile } = utilPromise
 
 // all valid npm commands (excluding aliases):
-type NPMCommand = "access" | "adduser" | "audit" | "bin" | "bugs" | "cache" | "ci" | "completion" | "config" | "dedupe" | "deprecate" | "diff" | "dist-tag" | "docs" | "doctor" | "edit" | "exec" | "explain" | "explore" | "find-dupes" | "fund" | "help" | "help-search" | "hook" | "init" | "install" | "install-ci-test" | "install-test" | "link" | "logout" | "ls" | "org" | "outdated" | "owner" | "pack" | "ping" | "pkg" | "prefix" | "profile" | "prune" | "publish" | "rebuild" | "repo" | "restart" | "root" | "run-script" | "search" | "set-script" | "shrinkwrap" | "star" | "stars" | "start" | "stop" | "team" | "test" | "token" | "uninstall" | "unpublish" | "unstar" | "update" | "version" | "view" | "whoami" | "npx"
+type NPMCommand =
+  | "access"
+  | "adduser"
+  | "audit"
+  | "bin"
+  | "bugs"
+  | "cache"
+  | "ci"
+  | "completion"
+  | "config"
+  | "dedupe"
+  | "deprecate"
+  | "diff"
+  | "dist-tag"
+  | "docs"
+  | "doctor"
+  | "edit"
+  | "exec"
+  | "explain"
+  | "explore"
+  | "find-dupes"
+  | "fund"
+  | "help"
+  | "help-search"
+  | "hook"
+  | "init"
+  | "install"
+  | "install-ci-test"
+  | "install-test"
+  | "link"
+  | "logout"
+  | "ls"
+  | "org"
+  | "outdated"
+  | "owner"
+  | "pack"
+  | "ping"
+  | "pkg"
+  | "prefix"
+  | "profile"
+  | "prune"
+  | "publish"
+  | "rebuild"
+  | "repo"
+  | "restart"
+  | "root"
+  | "run-script"
+  | "search"
+  | "set-script"
+  | "shrinkwrap"
+  | "star"
+  | "stars"
+  | "start"
+  | "stop"
+  | "team"
+  | "test"
+  | "token"
+  | "uninstall"
+  | "unpublish"
+  | "unstar"
+  | "update"
+  | "version"
+  | "view"
+  | "whoami"
+  | "npx"
 
 // NPM package object:
 export class Pkg {
@@ -73,29 +136,94 @@ export class Pkg {
 
   
   // this will do the post processing that NPMSearchPkgRegex needs to make a complete pkg name:
-  static NPMSeachPkg() {}
+  static NPMSearchPkg() {}
   */
 
   // this will find pkg name is NPM search results even in non-parseable mode:
   // will even work with long and non-long mode,
-  // multi-line pkgs will need some further proessing though...
-  static readonly NPMSearchPkgRegex: RegExp = /^[\w@/.-]+(?= {2,})|^[\w@/.-]+.+(?:[\r|\n|\r\n][\w@/.-]+(?=.+\| +\|).*)+/gim
+  // multi-line pkgs will need some further processing though...
+  static readonly NPMSearchPkgRegex: RegExp =
+    /^[\w@/.-]+(?= {2,})|^[\w@/.-]+.+(?:[\r|\n|\r\n][\w@/.-]+(?=.+\| +\|).*)+/gim
 
-  // this will split each search result into a seperate match:
+  // this will split each search result into a separate match:
   static readonly NPMSearchResultRegex: RegExp = /(?=^[\w@/.-]+(?!.*\| +\|)(?:.*\n.+(?:\| +\|)+.*)*)/gim
 
   // all valid NPM commands (excluding aliases):
-  static commands: string[] = ["access", "adduser", "audit", "bin", "bugs", "cache", "ci", "completion", "config", "dedupe", "deprecate", "diff", "dist-tag", "docs", "doctor", "edit", "exec", "explain", "explore", "find-dupes", "fund", "help", "help-search", "hook", "init", "install", "install-ci-test", "install-test", "link", "logout", "ls", "org", "outdated", "owner", "pack", "ping", "pkg", "prefix", "profile", "prune", "publish", "rebuild", "repo", "restart", "root", "run-script", "search", "set-script", "shrinkwrap", "star", "stars", "start", "stop", "team", "test", "token", "uninstall", "unpublish", "unstar", "update", "version", "view", "whoami"]
+  static commands: string[] = [
+    "access",
+    "adduser",
+    "audit",
+    "bin",
+    "bugs",
+    "cache",
+    "ci",
+    "completion",
+    "config",
+    "dedupe",
+    "deprecate",
+    "diff",
+    "dist-tag",
+    "docs",
+    "doctor",
+    "edit",
+    "exec",
+    "explain",
+    "explore",
+    "find-dupes",
+    "fund",
+    "help",
+    "help-search",
+    "hook",
+    "init",
+    "install",
+    "install-ci-test",
+    "install-test",
+    "link",
+    "logout",
+    "ls",
+    "org",
+    "outdated",
+    "owner",
+    "pack",
+    "ping",
+    "pkg",
+    "prefix",
+    "profile",
+    "prune",
+    "publish",
+    "rebuild",
+    "repo",
+    "restart",
+    "root",
+    "run-script",
+    "search",
+    "set-script",
+    "shrinkwrap",
+    "star",
+    "stars",
+    "start",
+    "stop",
+    "team",
+    "test",
+    "token",
+    "uninstall",
+    "unpublish",
+    "unstar",
+    "update",
+    "version",
+    "view",
+    "whoami"
+  ]
 
   // this sanitizes string input to the NPM child process:
   static argSanitize = argSanitize
   static argvSanitize = argvSanitize
-  
-  #_id: string = ""
-  #_version: string = ""
-  view: string = ""
+
+  #_id = ""
+  #_version = ""
+  view = ""
   path: FSPath = ""
-  conf: boolean = false
+  conf = false
   search: string[] = []
 
   set name(newName: string) {
@@ -119,20 +247,43 @@ export class Pkg {
     this.#_id = Pkg.argSanitize(name)
   }
 
-
   // npm init command to create install package:
-  static async init({ location, opts, raw }: { location: FSPath, opts: string[], raw?: false | undefined }): Promise<string>
-  static async init({ location, opts, raw }: { location: FSPath, opts: string[], raw?: boolean }): Promise<ExecFileResult>
-  static async init({ location, opts, raw }: { location: FSPath, opts: string[], raw?: boolean }): Promise<string | ExecFileResult> {
+  static async init({
+    location,
+    opts,
+    raw
+  }: {
+    location: FSPath
+    opts: string[]
+    raw?: false | undefined
+  }): Promise<string>
+  static async init({
+    location,
+    opts,
+    raw
+  }: {
+    location: FSPath
+    opts: string[]
+    raw?: boolean
+  }): Promise<ExecFileResult>
+  static async init({
+    location,
+    opts,
+    raw
+  }: {
+    location: FSPath
+    opts: string[]
+    raw?: boolean
+  }): Promise<string | ExecFileResult> {
     // save old working directory:
     const currentDir = cwd()
-    
+
     // change current working directory to the npm init location:
     chdir(location)
-    
+
     // init npm package.json in current directory:
     const result = await this.npmCommand("init", ...opts)
-    
+
     // change back to the old working directory:
     chdir(currentDir)
 
@@ -142,18 +293,48 @@ export class Pkg {
   }
 
   // npm command to install pkgs:
-  static async install({ pkgs, location, opts, raw }: { pkgs: string[], location: FSPath, opts: string[], raw?: false | undefined }): Promise<string>
-  static async install({ pkgs, location, opts, raw }: { pkgs: string[], location: FSPath, opts: string[], raw?: boolean }): Promise<ExecFileResult>
-  static async install({ pkgs, location, opts, raw }: { pkgs: string[], location: FSPath, opts: string[], raw?: boolean }): Promise<string | ExecFileResult> {
+  static async install({
+    pkgs,
+    location,
+    opts,
+    raw
+  }: {
+    pkgs: string[]
+    location: FSPath
+    opts: string[]
+    raw?: false | undefined
+  }): Promise<string>
+  static async install({
+    pkgs,
+    location,
+    opts,
+    raw
+  }: {
+    pkgs: string[]
+    location: FSPath
+    opts: string[]
+    raw?: boolean
+  }): Promise<ExecFileResult>
+  static async install({
+    pkgs,
+    location,
+    opts,
+    raw
+  }: {
+    pkgs: string[]
+    location: FSPath
+    opts: string[]
+    raw?: boolean
+  }): Promise<string | ExecFileResult> {
     // save old working directory:
     const currentDir = cwd()
 
     // change current working directory to the npm init location:
     chdir(location)
-    
+
     // install npm pkgs in current directory:
     const result = await this.npmCommand("install", ...opts, ...pkgs)
-    
+
     // change back to the old working directory:
     chdir(currentDir)
 
@@ -163,9 +344,17 @@ export class Pkg {
   }
 
   // npm info command to get information about a pkg in registry:
-  static async view({ pkg, opts, raw }: { pkg: string, opts: string[], raw?: false | undefined }): Promise<string>
-  static async view({ pkg, opts, raw }: { pkg: string, opts: string[], raw?: boolean }): Promise<ExecFileResult>
-  static async view({ pkg, opts, raw }: { pkg: string, opts: string[], raw?: boolean }): Promise<string | ExecFileResult> {
+  static async view({ pkg, opts, raw }: { pkg: string; opts: string[]; raw?: false | undefined }): Promise<string>
+  static async view({ pkg, opts, raw }: { pkg: string; opts: string[]; raw?: boolean }): Promise<ExecFileResult>
+  static async view({
+    pkg,
+    opts,
+    raw
+  }: {
+    pkg: string
+    opts: string[]
+    raw?: boolean
+  }): Promise<string | ExecFileResult> {
     const result = await this.npmCommand("view", ...opts, pkg)
 
     if (raw) return result
@@ -174,39 +363,90 @@ export class Pkg {
   }
 
   // npm search command to find pkgs in registry:
-  static async search({ terms, opts, raw }: { terms: string[], opts: string[], raw?: false | undefined }): Promise<string>
-  static async search({ terms, opts, raw }: { terms: string[], opts: string[], raw?: boolean }): Promise<ExecFileResult>
-  static async search({ terms, opts, raw }: { terms: string[], opts: string[], raw?: boolean }): Promise<string | ExecFileResult> {
+  static async search({
+    terms,
+    opts,
+    raw
+  }: {
+    terms: string[]
+    opts: string[]
+    raw?: false | undefined
+  }): Promise<string>
+  static async search({ terms, opts, raw }: { terms: string[]; opts: string[]; raw?: boolean }): Promise<ExecFileResult>
+  static async search({
+    terms,
+    opts,
+    raw
+  }: {
+    terms: string[]
+    opts: string[]
+    raw?: boolean
+  }): Promise<string | ExecFileResult> {
     const result = await this.npmCommand("search", ...opts, ...terms)
-    
+
     if (raw) return result
-    
+
     return result.stdout
   }
 
   // npm command to install pkgs:
-  static async pack({ pkgs, location, opts, cd, raw }: { pkgs: string[], location: FSPath, opts: string[], cd?: boolean, raw?: false | undefined }): Promise<string>
-  static async pack({ pkgs, location, opts, cd, raw }: { pkgs: string[], location: FSPath, opts: string[], cd?: boolean, raw?: boolean }): Promise<ExecFileResult>
-  static async pack({ pkgs, location, opts, cd, raw }: { pkgs: string[], location: FSPath, opts: string[], cd?: boolean, raw?: boolean }): Promise<string | ExecFileResult> {
+  static async pack({
+    pkgs,
+    location,
+    opts,
+    cd,
+    raw
+  }: {
+    pkgs: string[]
+    location: FSPath
+    opts: string[]
+    cd?: boolean
+    raw?: false | undefined
+  }): Promise<string>
+  static async pack({
+    pkgs,
+    location,
+    opts,
+    cd,
+    raw
+  }: {
+    pkgs: string[]
+    location: FSPath
+    opts: string[]
+    cd?: boolean
+    raw?: boolean
+  }): Promise<ExecFileResult>
+  static async pack({
+    pkgs,
+    location,
+    opts,
+    cd,
+    raw
+  }: {
+    pkgs: string[]
+    location: FSPath
+    opts: string[]
+    cd?: boolean
+    raw?: boolean
+  }): Promise<string | ExecFileResult> {
     let result: ExecFileResult
-    
+
     // use location as pack destination:
-    if (cd){
+    if (cd) {
       // save old working directory:
       const currentDir = cwd()
-      
+
       // change current working directory to the npm pack location:
       chdir(location)
 
       // pack pkgs in current directory:
       result = await this.npmCommand("pack", ...opts, ...pkgs)
-      
+
       // change back to the old working directory:
       chdir(currentDir)
-    }
-    else {
+    } else {
       // pack pkgs in destination directory:
-      result = await this.npmCommand("pack", `--pack-destination ${location}`, ...opts, ...pkgs)  
+      result = await this.npmCommand("pack", `--pack-destination ${location}`, ...opts, ...pkgs)
     }
 
     if (raw) return result
@@ -215,16 +455,16 @@ export class Pkg {
   }
 
   // reusable for npm cli:
-  static async npm (...args: string[]): ExecFileAsyncResult {
+  static async npm(...args: string[]): ExecFileAsyncResult {
     // exec using sanitized string:
     return await execFile("npm", this.argvSanitize(args))
   }
 
   // reusable for all npm commands:
-  static async npmCommand (command: NPMCommand, ...args: string[]): ExecFileAsyncResult {
+  static async npmCommand(command: NPMCommand, ...args: string[]): ExecFileAsyncResult {
     // check a valid command is being used:
     if (!this.commands.includes(command)) throw Error("Invalid or incompatible NPM command for NPM wrapper")
-    
+
     return await this.npm(command, ...args)
   }
 
@@ -250,32 +490,30 @@ export class Pkg {
   static find = this.search
 }
 
-
 // convert Commander.js OptionValues to npm CLI compatible format:
 const pkgComToOpt = (opts: OptionValues): string[] => {
   // make npm compatable string array for options:
   // use `--option` syntax, space if just a flag, should work for options with `=value`
   // `--option  `, or `--option value`
   return Object.entries(opts).map(opt => {
-    // make the OptionVaule, eg `saveDev`, syntax
+    // make the OptionValue, eg `saveDev`, syntax
     // npm compatible, eg `--save-dev`, syntax:
     let optName = opt[0]
     const optMatch = optName.match(/[A-Z]/g)
 
     // replace in string:
-    if (optMatch){
-      for (const match of optMatch){
+    if (optMatch) {
+      for (const match of optMatch) {
         optName = optName.replace(match, `-${match.toLowerCase()}`)
       }
     }
-    
+
     // if the option doesn't have a value, use empty string:
-    const optVal = (opt[1] !== "") ? ` ${opt[1]}` : ""
-    
-    return `--${optName}`+optVal
+    const optVal = opt[1] !== "" ? ` ${opt[1]}` : ""
+
+    return `--${optName}` + optVal
   })
 }
-
 
 // convert Pkg format to npm search compatible format:
 const pkgSearchResults = (pkg: Pkg) => {
@@ -290,11 +528,11 @@ const pkgSearchResults = (pkg: Pkg) => {
       name: `Install: "${pkg.name}"`
     }
   ]
-  
+
   // make sure there are results:
   if (pkg.search.length > 0) {
     // loop through each search result:
-    for (const res of pkg.search){ 
+    for (const res of pkg.search) {
       // array from npm parseable output that is tab delimited:
       const resFields = res.split("\t", 5)
 
@@ -302,153 +540,161 @@ const pkgSearchResults = (pkg: Pkg) => {
         // pkg that is installed
         value: resFields[0],
         //  shown to user: pkg name, version, description, date published, maintainers:
-        name: `${resFields[0]}  ${resFields[4]}  ${resFields[1]}  ${resFields[3]}  ${resFields[2]}` 
+        name: `${resFields[0]}  ${resFields[4]}  ${resFields[1]}  ${resFields[3]}  ${resFields[2]}`
       })
     }
   }
-  
+
   return results
 }
 
-
 // pack npm package:
-export const pkgPack = async ({ pkg, opts, location }: { pkg: Pkg, location: FSPath, opts: OptionValues }) => {
+export const pkgPack = async ({ pkg, opts, location }: { pkg: Pkg; location: FSPath; opts: OptionValues }) => {
   return await Pkg.pack({ pkgs: [pkg.name], location, opts: pkgComToOpt(opts), cd: true })
 }
-
 
 // make a temporary npm package to install to:
 export const pkgTmpInit = async (location: FSPath) => {
   return await Pkg.init({ location, opts: ["--yes"] })
 }
 
-
 // searches pkg registry to find selected pkgs:
-export const pkgSearchQ = new Q("Searching Registry For Packages", { useShell: true/* , useVerbose: true, useDebug: true */ })
-.pipe(({ opts, args }: { opts: OptionValues, args: string[] }) => {
-  const pkgs: Pkg[] = []
-  let i = 0
+export const pkgSearchQ = new Q("Searching Registry For Packages", {
+  useShell: true /* , useVerbose: true, useDebug: true */
+})
+  .pipe(({ opts, args }: { opts: OptionValues; args: string[] }) => {
+    const pkgs: Pkg[] = []
+    let i = 0
 
-  // create an array of Pkg object to the corresponding pkg to be installed:
-  for (const name of args) {
-    pkgs[i] = new Pkg({ name })
-    i++
-  }
+    // create an array of Pkg object to the corresponding pkg to be installed:
+    for (const name of args) {
+      pkgs[i] = new Pkg({ name })
+      i++
+    }
 
-  return { opts, pkgs}
-}, "Creating Package List")
-.pipe(async ({ opts, pkgs }: { opts: OptionValues, pkgs: Pkg[] }) => {
-  // save the pkg search results data to each Pkg object:
-  for (const pkg of pkgs) {
-    // get newline separated results:
-    const foundPkgs = await Pkg.search({ opts: ["--long", "--parseable", "--color=false"], terms: [pkg.name] })
-    
-    // split each result into an array index, and remove empty lines:
-    pkg.search = foundPkgs.split("\n").filter(res => res !== "")
-  }
+    return { opts, pkgs }
+  }, "Creating Package List")
+  .pipe(async ({ opts, pkgs }: { opts: OptionValues; pkgs: Pkg[] }) => {
+    // save the pkg search results data to each Pkg object:
+    for (const pkg of pkgs) {
+      // get newline separated results:
+      const foundPkgs = await Pkg.search({ opts: ["--long", "--parseable", "--color=false"], terms: [pkg.name] })
 
-  return { opts, pkgs }
-}, "Searching For Possible Packages")
-.pipe(async ({ opts, pkgs }: { opts: OptionValues, pkgs: Pkg[] }) => {
-  // save the pkg info data to each Pkg object:
-  for (const pkg of pkgs) {
-    pkg.view = await Pkg.view({ pkg: pkg.name, opts: ["--color=true"] })
-  }
+      // split each result into an array index, and remove empty lines:
+      pkg.search = foundPkgs.split("\n").filter(res => res !== "")
+    }
 
-  return { opts, pkgs }
-}, "Getting Info On Found Packages")
+    return { opts, pkgs }
+  }, "Searching For Possible Packages")
+  .pipe(async ({ opts, pkgs }: { opts: OptionValues; pkgs: Pkg[] }) => {
+    // save the pkg info data to each Pkg object:
+    for (const pkg of pkgs) {
+      pkg.view = await Pkg.view({ pkg: pkg.name, opts: ["--color=true"] })
+    }
+
+    return { opts, pkgs }
+  }, "Getting Info On Found Packages")
 
 export const pkgSearch = async (...pkgNames: string[]): Promise<Pkg[]> => {
   return (await pkgSearchQ.start(pkgNames)).pipe[0] as Pkg[]
 }
 
-
 // confirm pkgs to be installed from registry:
-export const pkgConfirmQ = new Q("Confirming Packages With User"/* , { useVerbose: true, useDebug: true } */)
-.pipe(async ({ opts, pkgs }: { opts: OptionValues, pkgs: Pkg[] }) => {
-  // ask user if pkg is correct:
-  for (const pkg of pkgs){
-    pkg.conf = (await inquirer.prompt({
-      type: "confirm",
-      name: "conf",
-      default: false,
-      message: `${pkg.view || pkg.name}
+export const pkgConfirmQ = new Q("Confirming Packages With User" /* , { useVerbose: true, useDebug: true } */)
+  .pipe(async ({ opts, pkgs }: { opts: OptionValues; pkgs: Pkg[] }) => {
+    // ask user if pkg is correct:
+    for (const pkg of pkgs) {
+      pkg.conf = (
+        await inquirer.prompt({
+          type: "confirm",
+          name: "conf",
+          default: false,
+          message: `${pkg.view || pkg.name}
 Is this the correct package: "${pkg.name}"?`
-    })).conf
-  }
-  
-  return { opts, pkgs }
-}, "Confirming Exact Packages")
-.pipe(async ({ opts, pkgs }: { opts: OptionValues, pkgs: Pkg[] }) => {
-  // ask user to select correct pkg from search results:
-  for (const pkg of pkgs){
-    // default to not installing pkg:
-    const nullPkg = `Do not install: "${pkg.name}"`
-    
-    // only correct unconfirmed pkgs:
-    if (!pkg.conf){
-      pkg.name = (await inquirer.prompt({
-        type: "list",
-        name: "name",
-        message: "Select the correct package:",
-        default: nullPkg,
-        choices: pkgSearchResults(pkg)
-      })).name
-      
-      // empty string for pkg name will result in no pkg being installed
-      if (pkg.name !== "") pkg.conf = true
+        })
+      ).conf
     }
-  }
 
-  // remove deselected pkgs, reversing through array to prevent skipping indecies:
-  for (let i = pkgs.length - 1; i >= 0; i--){
-    // remove only unconfirmed pkgs:
-    if (pkgs[i].conf === false) pkgs.splice(i, 1)
-  }
+    return { opts, pkgs }
+  }, "Confirming Exact Packages")
+  .pipe(async ({ opts, pkgs }: { opts: OptionValues; pkgs: Pkg[] }) => {
+    // ask user to select correct pkg from search results:
+    for (const pkg of pkgs) {
+      // default to not installing pkg:
+      const nullPkg = `Do not install: "${pkg.name}"`
 
-  return { opts, pkgs }
-}, "Sustituting Incorrect Packages")
+      // only correct unconfirmed pkgs:
+      if (!pkg.conf) {
+        pkg.name = (
+          await inquirer.prompt({
+            type: "list",
+            name: "name",
+            message: "Select the correct package:",
+            default: nullPkg,
+            choices: pkgSearchResults(pkg)
+          })
+        ).name
+
+        // empty string for pkg name will result in no pkg being installed
+        if (pkg.name !== "") pkg.conf = true
+      }
+    }
+
+    // remove deselected pkgs, reversing through array to prevent skipping indices:
+    for (let i = pkgs.length - 1; i >= 0; i--) {
+      // remove only unconfirmed pkgs:
+      if (pkgs[i].conf === false) pkgs.splice(i, 1)
+    }
+
+    return { opts, pkgs }
+  }, "Substituting Incorrect Packages")
 
 export const pkgConfirm = async (...pkgList: Pkg[]) => {
   return (await pkgConfirmQ.start(pkgList)).pipe[0]
 }
 
-
 // install pkgs:
-export const pkgInstallQ = new Q("Installing Packages", { useShell: true/* , useVerbose: true, useDebug: true */ })
-.pipe(async ({ opts, pkgs, tmpDir: location }: { opts: OptionValues, pkgs: Pkg[], tmpDir: FSPath }) => {
-  // make array of only the names of the pkgs:
-  const pkgNames = pkgs.map(pkg => pkg.name)
+export const pkgInstallQ = new Q("Installing Packages", { useShell: true /* , useVerbose: true, useDebug: true */ })
+  .pipe(async ({ opts, pkgs, tmpDir: location }: { opts: OptionValues; pkgs: Pkg[]; tmpDir: FSPath }) => {
+    // make array of only the names of the pkgs:
+    const pkgNames = pkgs.map(pkg => pkg.name)
 
-  // make npm compatable string array for options:
-  // use `--option` syntax, space if just a flag, should work for options with `=value`
-  // `--option  `, or `--option value`
-  const npmOptions = pkgComToOpt(opts)
-  
-  // log output from npm
-  // install using global-style to store pkg deps in each pkg's node_modules
-  // no-save will not create a package.json:
-  const res = await Pkg.install({ pkgs: pkgNames, opts: ["--global-style", "--no-save", "--color=true", ...npmOptions], location, raw: true })
-  console.error(res.stderr)
-  console.log(res.stdout)
+    // make npm compatable string array for options:
+    // use `--option` syntax, space if just a flag, should work for options with `=value`
+    // `--option  `, or `--option value`
+    const npmOptions = pkgComToOpt(opts)
 
-  return { opts, pkgs, location }
-}, "Installing")
-.pipe(({ opts, pkgs, location }: { opts: OptionValues, pkgs: Pkg[], location: FSPath }) => {
-  for (const pkg of pkgs) {
-    pkg.path = path.join(location, "node_modules", pkg.name)
-  }
-  
-  return { opts, pkgs }
-}, "Saving Install Location")
+    // log output from npm
+    // install using global-style to store pkg deps in each pkg's node_modules
+    // no-save will not create a package.json:
+    const res = await Pkg.install({
+      pkgs: pkgNames,
+      opts: ["--global-style", "--no-save", "--color=true", ...npmOptions],
+      location,
+      raw: true
+    })
+    console.error(res.stderr)
+    console.log(res.stdout)
 
-/* export const pkgInstall = async ({ pkgs, opts, location }: { pkgs: Pkg[], opts: OptionValues, location: FSPath }) => {
+    return { opts, pkgs, location }
+  }, "Installing")
+  .pipe(({ opts, pkgs, location }: { opts: OptionValues; pkgs: Pkg[]; location: FSPath }) => {
+    for (const pkg of pkgs) {
+      pkg.path = path.join(location, "node_modules", pkg.name)
+    }
+
+    return { opts, pkgs }
+  }, "Saving Install Location")
+
+/*
+export const pkgInstall = async ({ pkgs, opts, location }: { pkgs: Pkg[], opts: OptionValues, location: FSPath }) => {
   return (await pkgInstallQ.start({ pkgs, opts, location })).pipe[0].pkgs
-} */
+}
+*/
 
-
-
-/* (async () => {
+/*
+(async () => {
   const p = await pkgSearch("npm")
   console.log(pkgSearchResults(p[0]))
-})() */
+})()
+*/

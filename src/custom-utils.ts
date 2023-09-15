@@ -12,20 +12,17 @@ import { promisify } from "util"
  */
 class AsyncInterface extends Readline.Interface {
   // constructor(input: NodeJS.ReadableStream, output?: NodeJS.WritableStream, completer?: Readline.Completer | Readline.AsyncCompleter, terminal?: boolean){
-  constructor(options: Readline.ReadLineOptions){
+  constructor(options: Readline.ReadLineOptions) {
     // super(input, output, completer, terminal)
     super(options)
   }
 
   // override non-async method:
   question(query: string): Promise<string> {
-    
-    // return created promise for awaiting user responce asynchonously:
+    // return created promise for awaiting user responce asynchronously:
     return new Promise((resolve: Function) => {
-      
       // use normal readline.question() method:
       super.question(query, (responce: string) => {
-        
         // resolve promise with user input to return from promise:
         resolve(responce)
       })
@@ -47,13 +44,10 @@ const createAsyncInterface = (options: Readline.ReadLineOptions): Readline.Inter
   // async/await compatible readline.question() function:
   // this returns the user's responce string.
   AsyncReadlineInterface.question = (query: string): Promise<string> => {
-    
-    // return created promise for awaiting user responce asynchonously:
+    // return created promise for awaiting user responce asynchronously:
     return new Promise((resolve: Function) => {
-      
       // use normal readline.question() method:
       AsyncReadlineInterface.question(query, (responce: string) => {
-        
         // resolve promise with user input to return from promise:
         resolve(responce)
       })
@@ -63,8 +57,7 @@ const createAsyncInterface = (options: Readline.ReadLineOptions): Readline.Inter
   return AsyncReadlineInterface
 }
 
-
-const rl = <AsyncInterface> createAsyncInterface({
+const rl = <AsyncInterface>createAsyncInterface({
   input: stdin,
   output: stdout
 })
@@ -72,19 +65,16 @@ const rl = <AsyncInterface> createAsyncInterface({
 /**
  * @debrief - async generator for a for await...of loop to replace an Array forEach.
  */
-const asyncForEach = async (array: Array<any>, asyncCallback: Function, thisArg?: object | undefined) => {
-  
+const asyncForEach = async (array: Array<unknown>, asyncCallback: Function, thisArg?: object | undefined) => {
   // catch any promise errors:
   try {
-    
-    let index: number = 0
-    
+    let index = 0
+
     for (const value of array) {
       await asyncCallback.call(thisArg, value, index++, array)
     }
-  }
-  catch (e) {
-    console.error(e);
+  } catch (e) {
+    console.error(e)
   }
 }
 

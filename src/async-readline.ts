@@ -7,24 +7,21 @@ import { stdin, stdout } from "process"
 const rl = createInterface({
   input: stdin,
   output: stdout
-});
+})
 
 // async/await compatible readline.question() function:
 // this returns the user's responce string.
 const promiseQuestion = (question: string): Promise<string> => {
-  
-  // return created promise for awaiting user responce asynchonously:
+  // return created promise for awaiting user responce asynchronously:
   return new Promise((resolve: Function) => {
-    
     // use normal readline.question() method:
     rl.question(question, (responce: string) => {
-      
       // resolve promise with user input to return from promise:
       resolve(responce)
     })
   })
 }
 
-rl.question = promiseQuestion;
+rl.question = promiseQuestion
 
-export default rl;
+export default rl

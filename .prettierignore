@@ -1,2 +1,8 @@
 # don't reformat other pkgs's files:
 /node_modules
+/dist/
+/bin/
+pnpm-lock.ya*ml
+yarn-lock.ya*ml
+package-lock.json
+shrinkwrap.json

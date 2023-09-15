@@ -3,6 +3,7 @@
 NPM-Backup is a CLI utility to create local tarballs of NPM packages for offline installations with all dependencies.
 
 ## Install
+
 ```bash
 npm install --global https://github.com/nyctfall/npm-backup/tarball/v0.1.0
 ```
@@ -38,9 +39,10 @@ NPM-Backup was created because the native NPM package cache [`_cacache`](https:/
 
 So using `npm pack vite` to make a local package tarball into `vite-4.0.0.tgz`, and then install it with `npm install vite-4.0.0.tgz` does not make a complete install like `npm install vite` would!
 
-Because `npm pack` doesn't install any dependencies except those listed as `bundleDependencies` in the package.json, all needed dependencies need to be manually added to the `bundleDependencies`. So this is what NPM-Backup does. 
- - Fetch target package `vite` and needed dependencies from NPM registry by using npm to install vite
- - Dependencies have to be installed in the package directory's `node_modules`, manually added to the `bundleDependencies` list in the package's `package.json`, and then bundled together into a tarball by `npm pack`.
+Because `npm pack` doesn't install any dependencies except those listed as `bundleDependencies` in the package.json, all needed dependencies need to be manually added to the `bundleDependencies`. So this is what NPM-Backup does.
+
+- Fetch target package `vite` and needed dependencies from NPM registry by using npm to install vite
+- Dependencies have to be installed in the package directory's `node_modules`, manually added to the `bundleDependencies` list in the package's `package.json`, and then bundled together into a tarball by `npm pack`.
 
 ## Alternatives
 

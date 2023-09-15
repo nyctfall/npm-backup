@@ -3,22 +3,20 @@
  * @exports
  */
 
-
-
 /**
- * @typedef { Array<unknown> } Input 
+ * @typedef { Array<unknown> } Input
  */
 export type Input = unknown[]
 
 /**
  * @typedef { Object } Output - The return value of any `Op` or `Pipeline`.
- * @property { number } exitCode - Uses the shell convension of a `0` meaning a succesful exit and a non-zero integer meaning an error occured.
+ * @property { number } exitCode - Uses the shell conversion of a `0` meaning a successful exit and a non-zero integer meaning an error occurred.
  * @property { Error } Error - The Error object thrown.
  * @property { string } errorMsg - The formatted error message of the Error, made by an `Op` or `Pipeline`.
  * @property { Input } pipe - The value returned by the `Operation`.
  * @property { Trace } - debugBackTrace
  */
-export interface Output { 
+export interface Output {
   exitCode: number
   error: Error
   errorMsg: ErrMsgHeader | ""
@@ -26,14 +24,13 @@ export interface Output {
   debugBackTrace?: Trace
 }
 
-
-export type TraceBack = (startIndex?: number, endIndex?: number) => Trace | TraceStep 
+export type TraceBack = (startIndex?: number, endIndex?: number) => Trace | TraceStep
 export type TraceStep = {
   lastInput: Input
   nextInput: Input
   output: Output
-  localEnvirinment: EnvSettings
-  globalEvnironment?: OpsQueueEnvSettings
+  localEnvironment: EnvSettings
+  globalEnvironment?: OpsQueueEnvSettings
 } & TraceInstanceInfo
 
 type TraceInstancePipeline = {
@@ -53,7 +50,7 @@ type TraceInstanceFlOp = (TraceInstanceOp | TraceInstancePipeline) & {
 }
 
 /**
- * @summary describes whether an `Op` or nested `Pipeline` was ran in the `Pipeline`, and whether it was a fallback from another `Operation` in a preceeding `Op` or `Pipeline`.
+ * @summary describes whether an `Op` or nested `Pipeline` was ran in the `Pipeline`, and whether it was a fallback from another `Operation` in a preceding `Op` or `Pipeline`.
  * @typedef { Object } TraceInstanceInfo
  * @property { boolean } isOp
  * @property { boolean } isPipeline
@@ -61,8 +58,8 @@ type TraceInstanceFlOp = (TraceInstanceOp | TraceInstancePipeline) & {
  */
 export type TraceInstanceInfo = TraceInstanceOp | TraceInstancePipeline | TraceInstanceFlOp
 
-/** 
- * @summary a debugging tool that lists all input and output and environment settings 
+/**
+ * @summary a debugging tool that lists all input and output and environment settings
  * @typedef { Object } Trace
  * @property { Array<Input> } pipelineInputs
  * @property { Array<Output> } pipelineOutputs
@@ -73,12 +70,11 @@ export type Trace = {
   pipelineOutputs: Output[]
   pipelineInstanceInfo: TraceInstanceInfo[]
   enqueueChildDescriptions: string[]
-  enqueueLocalEnvirinments: EnvSettings[]
+  enqueueLocalEnvironments: EnvSettings[]
   enqueueInstanceInfo: TraceInstanceInfo[]
-  globalEvnironment: OpsQueueEnvSettings
+  globalEnvironment: OpsQueueEnvSettings
   nestedTraces?: Trace[]
 }
-
 
 /** @summary the behavioral settings for the  `Op`  and the  `OpsPipeline` */
 export interface EnvSettings {
@@ -103,16 +99,15 @@ export interface OpsQueueEnvSettings extends EnvSettings {
   useEmptyLoopback?: boolean
 }
 
-
-/** 
+/**
  * @summary the Op itself, normally NOT called directly
  * @
  */
 export type Op = (fn: Operation, input: Input, env?: EnvSettings) => Promise<Output>
 
-/** 
+/**
  * @summary The thing an Op wraps to call with error handling and also supports async Functions.
- * - NOTE currently has litte to no support for Generators of AsyncGenerator Functions.
+ * - NOTE currently has little to no support for Generators of AsyncGenerator Functions.
  * @returns An Array, or a value that will be put in an Array, in order to be piped.
  */
 export type Operation = (...input: any[]) => any[] | any
@@ -154,7 +149,6 @@ export type QueueableOpLike = QueueableOpsPipeline | OpCaller
 //   lastInput: Input
 // }
 
-
 /** @summary a pipeline that has already been set, and does NOT have  .pipe()  or  .fallback()  methods that change it. */
 export interface ImmutablePipeline {
   isMutable: false
@@ -173,7 +167,6 @@ export interface EmptyPipeline<T> extends Omit<ImmutablePipeline, "isMutable"> {
 export interface Pipeline<T> extends EmptyPipeline<T> {
   fallback(...arg0: unknown[]): T
 }
-  
 
 /** @summary USE THE COMMENTED TYPES TO CONFIRM STYLE: */
 // type SOpt = "s"|""
@@ -184,9 +177,10 @@ export interface Pipeline<T> extends EmptyPipeline<T> {
 type ErrMsgHeaderDescriptionSource = string // & `${FlOpt}${OpOpt}${PlOpt}`
 type Br = "\n" //| "\r\n"
 /** @summary end of style types. */
-type ErrMsgHeaderType = `ERROR! Error type: ${Error["name"]|""}${Br}`
-type ErrMsgHeaderDescription = `Name of the ${ErrMsgHeaderDescriptionSource} that failed: "${(EnvSettings["description"] & string)|""}"${Br}`
+type ErrMsgHeaderType = `ERROR! Error type: ${Error["name"] | ""}${Br}`
+type ErrMsgHeaderDescription = `Name of the ${ErrMsgHeaderDescriptionSource} that failed: "${
+  | (EnvSettings["description"] & string)
+  | ""}"${Br}`
 type ErrMsgHeaderErrNo = `Error exit code: ${Output["exitCode"]}${Br}`
-type ErrMsgHeaderMsgExt = `Error output: ${ReturnType<Error["toString"]>|""}${string|""}`
+type ErrMsgHeaderMsgExt = `Error output: ${ReturnType<Error["toString"]> | ""}${string | ""}`
 type ErrMsgHeader = `${ErrMsgHeaderType}${ErrMsgHeaderDescription}${ErrMsgHeaderErrNo}${ErrMsgHeaderMsgExt}`
-

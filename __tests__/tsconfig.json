@@ -6,14 +6,13 @@
       "path": "../bin"
     },
     {
-      "path": "../src-ts"
+      "path": "../src"
     }
   ],
   "compilerOptions": {
-    "rootDir": "./",
-    "outFile": "bundle",
-    "sourceMap": false,
     "noEmit": true,
+    "rootDir": "./",
+    "sourceMap": false,
     "declaration": false,
     "composite": true
   }

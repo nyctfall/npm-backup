@@ -1,6 +1,6 @@
 export * from "./prompt-answer"
 
-/** 
+/**
  * @debrief - This module creates the yes or no answer object.
  */
 

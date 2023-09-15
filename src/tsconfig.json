@@ -3,7 +3,7 @@
   "include": ["./"],
   "compilerOptions": {
     "rootDir": "./",
-    "outDir": "../dist-js",
+    "outDir": "../dist",
     "composite": true
   }
 }

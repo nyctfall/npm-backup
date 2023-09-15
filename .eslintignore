@@ -1,2 +1,4 @@
 # don't use linting on other pkgs's files:
 /node_modules
+/bin/
+/dist/

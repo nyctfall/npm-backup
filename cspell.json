@@ -1,0 +1,34 @@
+{
+  "dictionaries": [
+    "en_US",
+    "en-gb",
+    "companies",
+    "softwareTerms",
+    "misc",
+    "typescript",
+    "node",
+    "html",
+    "css",
+    "bash",
+    "fonts",
+    "filetypes",
+    "npm",
+    "scientific-terms-us"
+  ],
+  "allowCompoundWords": true,
+  "minWordLength": 4,
+  "words": [
+    "cacache",
+    "cafile",
+    "mycorp",
+    "myorg",
+    "mypackage",
+    "noproxy",
+    "preid",
+    "unstar",
+    "IIFE",
+    "deduped",
+    "deduping",
+    "fuzzer"
+  ]
+}
